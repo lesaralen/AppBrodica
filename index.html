@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#06192e">
+<title>Kviz – Voditelj brodice kategorije B</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,400;0,600;0,800;1,400&family=Barlow+Condensed:wght@500;600;700&display=swap');
+  :root{
+    --navy:#0a2540;--deep:#06192e;--sea:#1b6ca8;--foam:#5fb3d4;
+    --sand:#f4ead7;--paper:#fbf6ec;--ink:#10222f;--coral:#e0533d;
+    --gold:#e8b04b;--green:#3f9b6d;--line:rgba(10,37,64,.16);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{
+    font-family:'Bitter',Georgia,serif;
+    background:
+      radial-gradient(circle at 12% 8%, rgba(95,179,212,.12), transparent 40%),
+      radial-gradient(circle at 88% 92%, rgba(224,83,61,.08), transparent 45%),
+      var(--paper);
+    color:var(--ink);line-height:1.6;padding:0 0 80px;
+    overflow-x:hidden;-webkit-tap-highlight-color:rgba(27,108,168,.15);
+  }
+  header{
+    background:linear-gradient(160deg,var(--deep),var(--navy) 60%,var(--sea));
+    color:var(--sand);padding:46px 24px 38px;position:relative;overflow:hidden;
+    border-bottom:5px solid var(--gold);
+  }
+  header::after{content:"";position:absolute;inset:0;
+    background-image:repeating-linear-gradient(90deg,transparent,transparent 38px,rgba(255,255,255,.025) 38px,rgba(255,255,255,.025) 39px);
+    pointer-events:none;}
+  .wrap{max-width:920px;margin:0 auto;position:relative;z-index:2}
+  .kicker{font-family:'Barlow Condensed',sans-serif;letter-spacing:.32em;text-transform:uppercase;font-size:.82rem;color:var(--foam);margin-bottom:10px}
+  header h1{font-size:clamp(1.9rem,5vw,3rem);font-weight:800;line-height:1.1;letter-spacing:-.5px}
+  header p{margin-top:14px;max-width:660px;color:#cfe4ef;font-size:1.02rem}
+
+  main{max-width:920px;margin:34px auto 0;padding:0 24px}
+
+  /* IZBORNIK */
+  .menu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;margin-top:10px}
+  .menu-card{
+    background:var(--paper);border:1px solid var(--line);border-radius:14px;
+    padding:24px 22px;cursor:pointer;transition:transform .15s,box-shadow .2s,border-color .2s;
+    border-left:6px solid var(--sea);position:relative;overflow:hidden;
+  }
+  .menu-card:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(10,37,64,.14);border-left-color:var(--coral)}
+  .menu-card .mc-num{font-family:'Barlow Condensed',sans-serif;font-size:3.4rem;font-weight:700;color:var(--gold);line-height:1}
+  .menu-card h3{font-size:1.18rem;font-weight:700;margin:6px 0 4px;color:var(--navy)}
+  .menu-card .mc-meta{font-family:'Barlow Condensed',sans-serif;letter-spacing:.14em;text-transform:uppercase;font-size:.74rem;color:#6c7c86}
+  .menu-card .mc-prog{margin-top:14px;height:7px;background:rgba(10,37,64,.1);border-radius:5px;overflow:hidden}
+  .menu-card .mc-fill{height:100%;width:0;background:linear-gradient(90deg,var(--foam),var(--gold));transition:width .4s}
+  .menu-card .mc-stat{font-family:'Barlow Condensed',sans-serif;font-size:.86rem;color:var(--sea);margin-top:7px;letter-spacing:.04em}
+  .menu-intro{margin:8px 0 26px;color:#4a5a64;font-size:1rem}
+  .badge-done{position:absolute;top:14px;right:16px;background:var(--green);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:.72rem;letter-spacing:.1em;padding:4px 9px;border-radius:20px;text-transform:uppercase;display:none}
+  .menu-card.completed .badge-done{display:block}
+  .menu-card.completed{border-left-color:var(--green)}
+
+  /* KVIZ POGLED */
+  .quiz-view{display:none}
+  .quiz-view.active{display:block}
+  .menu-view.hidden{display:none}
+
+  .progress-bar{position:sticky;top:0;z-index:50;background:var(--deep);padding:12px 24px;border-bottom:1px solid rgba(255,255,255,.1)}
+  .progress-inner{max-width:920px;margin:0 auto;display:flex;align-items:center;gap:14px;color:var(--sand);font-family:'Barlow Condensed',sans-serif;flex-wrap:wrap}
+  .btn-back{background:transparent;color:var(--foam);border:1px solid var(--foam);font-family:'Barlow Condensed',sans-serif;letter-spacing:.1em;text-transform:uppercase;font-size:.78rem;padding:7px 13px;border-radius:7px;cursor:pointer;white-space:nowrap}
+  .btn-back:hover{background:var(--foam);color:var(--deep)}
+  .track{flex:1;min-width:120px;height:9px;background:rgba(255,255,255,.14);border-radius:6px;overflow:hidden}
+  .fill{height:100%;width:0;background:linear-gradient(90deg,var(--foam),var(--gold));transition:width .4s ease}
+  .score-pill{font-size:.92rem;letter-spacing:.05em;white-space:nowrap}
+
+  .section-head{margin:34px 0 0;padding:20px 22px;background:var(--navy);color:var(--sand);border-radius:10px 10px 0 0;display:flex;align-items:baseline;gap:14px;border-left:6px solid var(--coral)}
+  .section-head .num{font-family:'Barlow Condensed',sans-serif;font-size:2.1rem;font-weight:700;color:var(--gold);line-height:1}
+  .section-head h2{font-size:1.25rem;font-weight:700}
+  .section-head small{display:block;font-family:'Barlow Condensed',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--foam);font-size:.72rem;margin-top:3px}
+
+  .q{background:var(--paper);border:1px solid var(--line);border-top:none;padding:22px 24px}
+  .q:nth-of-type(even){background:#fdfaf2}
+  .q.last-in-sec{border-radius:0 0 10px 10px}
+  .q-top{display:flex;gap:14px;align-items:flex-start}
+  .q-no{font-family:'Barlow Condensed',sans-serif;background:var(--sea);color:#fff;min-width:42px;height:42px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;font-weight:700;flex-shrink:0}
+  .q-text{font-size:1.05rem;font-weight:600;padding-top:7px}
+
+  .diagram{margin:16px 0 4px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;text-align:center}
+  .diagram svg{max-width:100%;height:auto}
+  .diagram .cap{font-family:'Barlow Condensed',sans-serif;letter-spacing:.12em;text-transform:uppercase;font-size:.72rem;color:#6c7c86;margin-top:8px}
+
+  .answer-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:flex-start}
+  input[type=text],textarea{flex:1;min-width:220px;font-family:'Bitter',serif;font-size:1rem;padding:12px 15px;border:2px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);transition:border-color .2s}
+  textarea{flex:1 1 100%;min-height:74px;resize:vertical}
+  input[type=text]:focus,textarea:focus{outline:none;border-color:var(--sea)}
+  .btn{font-family:'Barlow Condensed',sans-serif;letter-spacing:.12em;text-transform:uppercase;font-weight:600;font-size:.9rem;padding:12px 20px;border:none;border-radius:8px;cursor:pointer;transition:transform .12s,filter .2s}
+  .btn:active{transform:translateY(1px)}
+  .btn-check{background:var(--sea);color:#fff}
+  .btn-check:hover{filter:brightness(1.1)}
+  .btn-hint{background:transparent;color:#8a6a1f;border:2px solid var(--gold);padding:10px 16px}
+  .btn-hint:hover{background:var(--gold);color:var(--deep)}
+  .btn-show{background:transparent;color:var(--sea);border:2px solid var(--sea);padding:10px 16px}
+  .btn-show:hover{background:var(--sea);color:#fff}
+
+  .hintbox{display:none;margin-top:12px;padding:11px 15px;border-radius:8px;background:rgba(232,176,75,.14);border-left:4px solid var(--gold);font-size:.95rem;font-style:italic;color:#7a5e15}
+  .hintbox.show{display:block;animation:pop .25s ease}
+  .feedback{margin-top:14px;padding:14px 16px;border-radius:8px;font-size:.98rem;display:none;animation:pop .25s ease}
+  @keyframes pop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  .feedback.correct{display:block;background:rgba(63,155,109,.13);border-left:4px solid var(--green)}
+  .feedback.wrong{display:block;background:rgba(224,83,61,.12);border-left:4px solid var(--coral)}
+  .feedback.shown{display:block;background:rgba(27,108,168,.12);border-left:4px solid var(--sea)}
+  .feedback strong{font-family:'Barlow Condensed',sans-serif;letter-spacing:.08em;text-transform:uppercase;font-size:.82rem;display:block;margin-bottom:5px}
+  .feedback .sol{font-weight:600}
+
+  .final{margin:36px 0 0;background:linear-gradient(160deg,var(--navy),var(--deep));color:var(--sand);border-radius:14px;padding:38px 30px;text-align:center;border:2px solid var(--gold);display:none}
+  .final.show{display:block;animation:pop .4s ease}
+  .final h2{font-size:1.6rem;margin-bottom:8px}
+  .final .big{font-family:'Barlow Condensed',sans-serif;font-size:3.6rem;font-weight:700;color:var(--gold);line-height:1}
+  .final p{margin-top:10px;color:#cfe4ef}
+  .controls{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+  .btn-reset{background:var(--coral);color:#fff}
+  .btn-menu{background:var(--gold);color:var(--deep)}
+
+  footer{max-width:920px;margin:50px auto 0;padding:0 24px;color:#7a8893;font-size:.85rem;text-align:center}
+
+  /* ===== SRICANJE (vjezba) ===== */
+  .menu-card.spell{border-left-color:var(--gold)}
+  .menu-card.spell .mc-num{color:var(--coral)}
+  .spell-intro{background:linear-gradient(160deg,var(--navy),var(--deep));color:var(--sand);border-radius:12px;padding:22px 24px;margin:24px 0 20px;border-left:6px solid var(--gold)}
+  .spell-intro h3{font-size:1.15rem;margin-bottom:8px;color:var(--gold);font-family:'Barlow Condensed',sans-serif;letter-spacing:.08em;text-transform:uppercase}
+  .spell-intro p{font-size:.94rem;color:#cfe4ef;line-height:1.55}
+  .spell-table{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:24px}
+  .spell-cell{background:#fff;border:1px solid var(--line);border-radius:7px;padding:9px 11px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:.95rem}
+  .spell-cell .l{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.15rem;color:var(--sea)}
+  .spell-cell .w{color:var(--ink);font-weight:600}
+  .spell-cell.dia{background:#fff5dc;border-color:var(--gold)}
+  .spell-cell.dia .l{color:var(--coral)}
+  .spell-cell.num{background:#eef5fa}
+  .spell-cell.num{background:#eef5fa;flex-direction:column;align-items:stretch;gap:4px;padding:10px 12px}
+  .spell-cell.num .l{font-size:1.4rem;color:var(--coral);margin-bottom:2px}
+  .spell-cell.num .w{display:flex;flex-direction:column;gap:2px}
+  .num-full{font-size:.95rem;color:var(--navy);font-weight:700}
+  .num-simple{font-size:.82rem;color:#6c7c86;font-weight:500}
+  .num-simple::before{content:"≈ "}
+  .num-note{grid-column:1/-1;background:#fff8e6;border:1px solid var(--gold);border-radius:8px;padding:12px 14px;font-size:.9rem;color:#7a5e15;line-height:1.55;margin-bottom:4px}
+  .num-note strong{color:var(--coral)}
+  .num-note em{font-style:normal;background:#fff;padding:1px 6px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--navy)}
+  .spell-section-title{font-family:'Barlow Condensed',sans-serif;letter-spacing:.16em;text-transform:uppercase;font-size:.78rem;color:#6c7c86;margin:18px 0 8px;grid-column:1/-1}
+  .term-card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+  .term-card:nth-of-type(even){background:#fdfaf2}
+  .term-word{font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:700;color:var(--navy);letter-spacing:.04em;flex:1;min-width:140px}
+  .term-tag{font-size:.74rem;font-family:'Barlow Condensed',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#6c7c86;display:block;font-weight:400;margin-top:2px}
+  .term-answer{display:none;flex:1 1 100%;margin-top:8px;padding:12px 14px;background:rgba(27,108,168,.1);border-left:4px solid var(--sea);border-radius:7px;font-size:1rem;color:var(--ink);font-weight:600;line-height:1.55;animation:pop .25s ease}
+  .term-answer.show{display:block}
+  .btn-term{background:var(--sea);color:#fff;padding:11px 18px;font-size:.86rem;white-space:nowrap}
+  .btn-term.shown{background:var(--gold);color:var(--deep)}
+
+  /* ===== TABLET (do 768px) ===== */
+  @media(max-width:768px){
+    main{padding:0 16px}
+    header{padding:34px 18px 28px}
+    .wrap,.progress-inner,footer{padding-left:0;padding-right:0}
+    .menu-grid{grid-template-columns:1fr;gap:14px}
+    .q{padding:18px 16px}
+    .section-head{padding:16px 16px}
+  }
+
+  /* ===== MOBITEL (do 560px) ===== */
+  @media(max-width:560px){
+    body{padding-bottom:60px}
+    header{padding:28px 16px 24px}
+    header p{font-size:.96rem}
+    .kicker{font-size:.74rem;letter-spacing:.22em}
+    main{margin-top:20px}
+
+    /* Sticky traka: kompaktnija da ne jede ekran */
+    .progress-bar{padding:9px 14px}
+    .progress-inner{gap:10px;font-size:.86rem}
+    .btn-back{padding:9px 12px;font-size:.74rem}
+    .track{min-width:80px;height:8px}
+    .score-pill{font-size:.82rem}
+
+    /* Pitanja */
+    .q{padding:18px 14px}
+    .q-top{gap:10px}
+    .q-no{min-width:36px;height:36px;font-size:.95rem}
+    .q-text{font-size:1.02rem;padding-top:5px;line-height:1.5}
+
+    /* Polja i gumbi: puna sirina, veci za dodir */
+    .answer-row{flex-direction:column;gap:10px}
+    input[type=text],textarea{
+      flex:1 1 100%;min-width:100%;width:100%;
+      font-size:16px;            /* sprjecava auto-zoom na iOS-u */
+      padding:14px 14px;
+    }
+    textarea{min-height:90px}
+    .btn{
+      width:100%;padding:15px 18px;font-size:1rem;
+      min-height:50px;            /* ugodan razmak za prst */
+    }
+
+    /* Dijagrami: vise prostora, citljiviji natpisi */
+    .diagram{padding:10px 8px;margin:14px 0 4px}
+    .diagram svg{width:100%;min-height:200px}
+    .diagram .cap{font-size:.7rem;line-height:1.4}
+
+    /* Kartice izbornika */
+    .menu-card{padding:20px 18px}
+    .menu-card .mc-num{font-size:2.8rem}
+    .menu-card h3{font-size:1.1rem}
+    .menu-intro{font-size:.95rem}
+
+    /* Rezultat */
+    .final{padding:30px 18px;margin-top:28px}
+    .final h2{font-size:1.4rem}
+    .final .big{font-size:3rem}
+    .controls{flex-direction:column;gap:10px}
+    .controls .btn{width:100%}
+
+    .section-head{padding:16px 14px;gap:10px}
+    .section-head .num{font-size:1.8rem}
+    .section-head h2{font-size:1.12rem}
+
+    .feedback,.hintbox{font-size:.95rem;padding:13px 14px}
+  }
+
+  /* ===== VRLO MALI MOBITEL (do 380px) ===== */
+  @media(max-width:380px){
+    header h1{font-size:1.65rem}
+    .q-text{font-size:.98rem}
+    .menu-card .mc-num{font-size:2.4rem}
+    .diagram svg{min-height:180px}
+  }
+
+  /* Na touch uredajima ukloni hover skok (smeta pri dodiru) */
+  @media(hover:none){
+    .menu-card:hover{transform:none;box-shadow:none;border-left-color:var(--sea)}
+    .btn-check:hover{filter:none}
+    .btn-hint:hover{background:transparent;color:#8a6a1f}
+    .btn-show:hover{background:transparent;color:var(--sea)}
+    .btn-back:hover{background:transparent;color:var(--foam)}
+    .btn:active{transform:scale(.98)}
+    .menu-card:active{transform:scale(.99)}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="kicker">Priručnik za ispit · Skripta</div>
+    <h1>Kviz: Voditelj brodice kategorije „B"</h1>
+    <p id="hdrSub">Odaberi cjelinu (predmet) i rješavaj je zasebno. Upiši odgovor i klikni Provjeri. Provjera prepoznaje ključne riječi, ali pitanja s više obaveznih dijelova traže sve dijelove. Natuknica je skrivena, klikni Pomoć kad zatreba.</p>
+  </div>
+</header>
+
+<main>
+  <!-- IZBORNIK -->
+  <div class="menu-view" id="menuView">
+    <p class="menu-intro">Pet predmeta ispita. Svaki ima svoj napredak i rezultat. Završi jedan, vrati se i kreni na sljedeći.</p>
+    <div class="menu-grid" id="menuGrid"></div>
+  </div>
+
+  <!-- KVIZ -->
+  <div class="quiz-view" id="quizView">
+    <div class="progress-bar">
+      <div class="progress-inner">
+        <button class="btn-back" onclick="goMenu()">← Izbornik</button>
+        <span class="score-pill" id="answeredPill">0 / 0</span>
+        <div class="track"><div class="fill" id="fill"></div></div>
+        <span class="score-pill" id="scorePill">Točno: 0</span>
+      </div>
+    </div>
+    <div id="quizBody"></div>
+    <div class="final" id="final">
+      <h2>Rezultat cjeline</h2>
+      <div class="big" id="finalScore">0%</div>
+      <p id="finalMsg"></p>
+      <div class="controls">
+        <button class="btn btn-menu" onclick="goMenu()">Natrag na izbornik</button>
+        <button class="btn btn-reset" onclick="resetSection()">Riješi ovu cjelinu ponovno</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>Izrađeno za samostalno učenje prema skripti „Voditelj brodice kategorije B". Naglasak je na podebljanim dijelovima skripte jer su najvažniji za ispit.</footer>
+
+<script>
+/* ---------- SVG DIJAGRAMI ---------- */
+const SVG={};
+SVG.kompas=`<svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg"><circle cx="160" cy="160" r="135" fill="#fbf6ec" stroke="#0a2540" stroke-width="2"/><circle cx="160" cy="160" r="100" fill="none" stroke="#1b6ca8" stroke-width="1" stroke-dasharray="3 4"/><line x1="160" y1="25" x2="160" y2="295" stroke="#0a2540" stroke-width="1.5"/><line x1="25" y1="160" x2="295" y2="160" stroke="#0a2540" stroke-width="1.5"/><line x1="65" y1="65" x2="255" y2="255" stroke="#1b6ca8" stroke-width="1" stroke-dasharray="2 3"/><line x1="255" y1="65" x2="65" y2="255" stroke="#1b6ca8" stroke-width="1" stroke-dasharray="2 3"/><polygon points="160,40 150,160 170,160" fill="#e0533d"/><polygon points="160,280 150,160 170,160" fill="#0a2540"/><text x="160" y="20" text-anchor="middle" font-family="Barlow Condensed" font-size="20" font-weight="700" fill="#e0533d">N · 0°/360°</text><text x="160" y="312" text-anchor="middle" font-family="Barlow Condensed" font-size="20" font-weight="700" fill="#0a2540">S · 180°</text><text x="305" y="165" text-anchor="end" font-family="Barlow Condensed" font-size="20" font-weight="700" fill="#0a2540">E · 90°</text><text x="15" y="165" font-family="Barlow Condensed" font-size="20" font-weight="700" fill="#0a2540">W · 270°</text><text x="232" y="92" font-family="Barlow Condensed" font-size="13" fill="#1b6ca8">I. kvadrant</text><text x="232" y="240" font-family="Barlow Condensed" font-size="13" fill="#1b6ca8">II. kvadrant</text><text x="55" y="240" font-family="Barlow Condensed" font-size="13" fill="#1b6ca8">III. kvadrant</text><text x="55" y="92" font-family="Barlow Condensed" font-size="13" fill="#1b6ca8">IV. kvadrant</text><circle cx="160" cy="160" r="6" fill="#0a2540"/></svg>`;
+SVG.vjetrovi=`<svg viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg"><circle cx="170" cy="170" r="140" fill="#fbf6ec" stroke="#0a2540" stroke-width="2"/><g font-family="Barlow Condensed" font-size="15" fill="#0a2540" text-anchor="middle"><line x1="170" y1="40" x2="170" y2="300" stroke="#cdd8de"/><line x1="40" y1="170" x2="300" y2="170" stroke="#cdd8de"/><line x1="78" y1="78" x2="262" y2="262" stroke="#cdd8de"/><line x1="262" y1="78" x2="78" y2="262" stroke="#cdd8de"/><text x="170" y="28" font-weight="700" fill="#e0533d">N · TRAMONTANA</text><text x="278" y="68" font-weight="700">NE · BURA</text><text x="312" y="174" font-weight="700">E · LEVANAT</text><text x="276" y="284" font-weight="700">SE · JUGO</text><text x="170" y="318" font-weight="700">S · OŠTRO</text><text x="64" y="284" font-weight="700">SW · LEBIĆ</text><text x="28" y="174" font-weight="700">W · PULENAT</text><text x="62" y="68" font-weight="700">NW · MAESTRAL</text></g><circle cx="170" cy="170" r="5" fill="#1b6ca8"/></svg>`;
+SVG.sektori=`<svg viewBox="0 0 360 300" xmlns="http://www.w3.org/2000/svg"><path d="M180 150 L60 60 A150 150 0 0 1 300 60 Z" fill="rgba(232,176,75,.30)"/><path d="M180 150 L60 60 A150 150 0 0 0 25 178 Z" fill="rgba(224,83,61,.30)"/><path d="M180 150 L300 60 A150 150 0 0 1 335 178 Z" fill="rgba(63,155,109,.30)"/><path d="M180 150 L25 178 A150 150 0 0 0 335 178 Z" fill="rgba(10,37,64,.18)"/><ellipse cx="180" cy="150" rx="22" ry="46" fill="#0a2540"/><polygon points="180,104 172,124 188,124" fill="#5fb3d4"/><text x="180" y="40" text-anchor="middle" font-family="Barlow Condensed" font-size="14" font-weight="700" fill="#9a7521">JARBOLNO 225°</text><text x="335" y="120" font-family="Barlow Condensed" font-size="13" font-weight="700" fill="#2f7a52">DESNO 112,5°</text><text x="10" y="120" font-family="Barlow Condensed" font-size="13" font-weight="700" fill="#b0381f">LIJEVO 112,5°</text><text x="180" y="240" text-anchor="middle" font-family="Barlow Condensed" font-size="14" font-weight="700" fill="#0a2540">KRMENO 135°</text><text x="180" y="285" text-anchor="middle" font-family="Bitter" font-size="11" fill="#5a6b76">Pramac je gore.</text></svg>`;
+SVG.dnevni=`<svg viewBox="0 0 520 150" xmlns="http://www.w3.org/2000/svg"><g fill="#10222f" stroke="#0a2540"><circle cx="45" cy="60" r="26"/><text x="45" y="115" text-anchor="middle" font-family="Barlow Condensed" font-size="13" fill="#0a2540">KUGLA</text><polygon points="150,86 124,86 137,34"/><text x="137" y="115" text-anchor="middle" font-family="Barlow Condensed" font-size="13" fill="#0a2540">ČUNJ vrh gore</text><polygon points="248,34 222,34 235,86"/><text x="235" y="115" text-anchor="middle" font-family="Barlow Condensed" font-size="13" fill="#0a2540">ČUNJ vrh dolje</text><polygon points="332,58 360,30 360,58"/><polygon points="332,58 360,86 360,58"/><polygon points="332,58 304,30 304,58"/><polygon points="332,58 304,86 304,58"/><polygon points="332,58 318,30 346,30"/><polygon points="332,58 318,86 346,86"/><text x="332" y="115" text-anchor="middle" font-family="Barlow Condensed" font-size="12" fill="#0a2540">DVOČUNJ baze</text><polygon points="430,30 416,58 444,58"/><polygon points="430,86 416,58 444,58"/><text x="430" y="115" text-anchor="middle" font-family="Barlow Condensed" font-size="12" fill="#0a2540">DVOČUNJ vrhovi</text><rect x="478" y="36" width="34" height="48" rx="2"/><text x="495" y="115" text-anchor="middle" font-family="Barlow Condensed" font-size="13" fill="#0a2540">VALJAK</text></g></svg>`;
+SVG.sudar=`<svg viewBox="0 0 400 230" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="230" fill="#eaf3f8"/><g font-family="Barlow Condensed" font-size="13"><polygon points="120,40 132,70 108,70" fill="#3f9b6d"/><line x1="120" y1="70" x2="120" y2="200" stroke="#3f9b6d" stroke-width="2" stroke-dasharray="5 4"/><text x="120" y="28" text-anchor="middle" fill="#2f7a52" font-weight="700">BROD A</text><text x="120" y="218" text-anchor="middle" fill="#2f7a52">drugog vidi sebi s LIJEVE</text><polygon points="350,120 320,108 320,132" fill="#e0533d"/><line x1="320" y1="120" x2="150" y2="120" stroke="#e0533d" stroke-width="2" stroke-dasharray="5 4"/><path d="M320 120 q-40 35 -20 80" stroke="#e0533d" stroke-width="2" fill="none" stroke-dasharray="5 4"/><text x="360" y="120" fill="#b0381f" font-weight="700">BROD B</text><text x="300" y="200" text-anchor="middle" fill="#b0381f">drugog vidi sebi s DESNE</text></g></svg>`;
+SVG.kardinalni=`<svg viewBox="0 0 360 200" xmlns="http://www.w3.org/2000/svg"><circle cx="180" cy="100" r="78" fill="#fbf6ec" stroke="#0a2540" stroke-width="2"/><line x1="180" y1="22" x2="180" y2="178" stroke="#0a2540" stroke-dasharray="3 3"/><line x1="102" y1="100" x2="258" y2="100" stroke="#0a2540" stroke-dasharray="3 3"/><text x="180" y="16" text-anchor="middle" font-family="Barlow Condensed" font-weight="700" font-size="15" fill="#0a2540">N kvadrant</text><text x="180" y="196" text-anchor="middle" font-family="Barlow Condensed" font-weight="700" font-size="15" fill="#0a2540">S kvadrant</text><text x="350" y="105" text-anchor="end" font-family="Barlow Condensed" font-weight="700" font-size="15" fill="#0a2540">E</text><text x="12" y="105" font-family="Barlow Condensed" font-weight="700" font-size="15" fill="#0a2540">W</text><path d="M180 100 L255 45 A78 78 0 0 0 180 22 Z" fill="rgba(232,176,75,.4)"/></svg>`;
+SVG.karta=`<svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="200" fill="#fff"/><path d="M0 0 H160 Q140 60 170 110 Q180 160 120 200 H0 Z" fill="#e8d089"/><text x="60" y="60" font-family="Barlow Condensed" font-size="14" fill="#7a5e15" font-weight="700">KOPNO</text><path d="M160 0 H260 Q250 70 270 130 Q255 175 200 200 H120 Q180 160 170 110 Q140 60 160 0 Z" fill="#bcdcea"/><text x="190" y="85" font-family="Barlow Condensed" font-size="13" fill="#1b6ca8" font-weight="700">PLAVO</text><rect x="260" width="140" height="200" fill="#fff"/><text x="295" y="85" font-family="Barlow Condensed" font-size="13" fill="#0a2540" font-weight="700">BIJELO</text><circle cx="210" cy="150" r="20" fill="none" stroke="#1b6ca8" stroke-dasharray="2 3"/><line x1="203" y1="150" x2="217" y2="150" stroke="#1b6ca8"/><line x1="210" y1="143" x2="210" y2="157" stroke="#1b6ca8"/></svg>`;
+SVG.cetverotakt=`<svg viewBox="0 0 480 150" xmlns="http://www.w3.org/2000/svg"><g font-family="Barlow Condensed" text-anchor="middle"><rect x="20" y="30" width="90" height="90" rx="6" fill="#eaf3f8" stroke="#1b6ca8" stroke-width="2"/><text x="65" y="20" font-size="13" font-weight="700" fill="#0a2540">1. USIS</text><rect x="135" y="30" width="90" height="90" rx="6" fill="#eaf3f8" stroke="#1b6ca8" stroke-width="2"/><text x="180" y="20" font-size="13" font-weight="700" fill="#0a2540">2. KOMPRESIJA</text><rect x="250" y="30" width="90" height="90" rx="6" fill="#fbe3dd" stroke="#e0533d" stroke-width="2"/><text x="295" y="20" font-size="13" font-weight="700" fill="#b0381f">3. EKSPANZIJA</text><rect x="365" y="30" width="90" height="90" rx="6" fill="#eaf3f8" stroke="#1b6ca8" stroke-width="2"/><text x="410" y="20" font-size="13" font-weight="700" fill="#0a2540">4. ISPUH</text></g></svg>`;
+SVG.podrucja=`<svg viewBox="0 0 440 170" xmlns="http://www.w3.org/2000/svg"><rect width="440" height="170" fill="#eaf3f8"/><rect width="60" height="170" fill="#e8d089"/><text x="30" y="90" text-anchor="middle" font-family="Barlow Condensed" font-size="13" font-weight="700" fill="#7a5e15" transform="rotate(-90 30 90)">OBALA</text><g font-family="Barlow Condensed" font-size="12" fill="#0a2540"><line x1="95" y1="20" x2="95" y2="150" stroke="#3f9b6d" stroke-dasharray="3 3"/><text x="100" y="40">IIIc · 1 Nm</text><line x1="150" y1="20" x2="150" y2="150" stroke="#3f9b6d" stroke-dasharray="3 3"/><text x="155" y="60">IIIb · 3 Nm</text><line x1="215" y1="20" x2="215" y2="150" stroke="#1b6ca8" stroke-dasharray="3 3"/><text x="220" y="80">IIIa · 6 Nm</text><line x1="290" y1="20" x2="290" y2="150" stroke="#1b6ca8" stroke-dasharray="3 3"/><text x="295" y="100">III · 12 Nm</text><line x1="370" y1="20" x2="370" y2="150" stroke="#e0533d" stroke-dasharray="3 3"/><text x="300" y="125">II · 20 Nm</text><text x="300" y="148" fill="#b0381f">I · sva mora</text></g></svg>`;
+
+/* ---------- PITANJA ----------
+ q  = tekst pitanja
+ a  = prihvatljivi pojmovi (ako nema 'all', dovoljan je jedan)
+ all= true => odgovor mora sadrzavati SVE skupine iz 'req'
+ req= [[varijante za dio 1],[varijante za dio 2], ...]
+ hint = skrivena natuknica koja NE sadrzi sam odgovor
+ diagram + cap = dijagram uz pitanje
+ textarea = veliko polje za unos
+*/
+const SECTIONS=[
+{num:"1",title:"Pomorska plovidba (navigacija)",sub:"Predmet 1",questions:[
+ {q:"Koliko godina najmanje mora imati osoba da stekne uvjerenje za voditelja brodice kategorije B?",a:["16"],hint:"Traži se točan broj godina."},
+ {q:"Koliko godina najmanje mora imati osoba za uvjerenje kategorije A?",a:["15"],hint:"Traži se točan broj godina."},
+ {q:"Koliko godina najmanje mora imati osoba za uvjerenje kategorije C?",a:["18"],hint:"Traži se točan broj godina."},
+ {q:"Do koje duljine jahte (u metrima) smije voditelj kategorije B upravljati za osobne potrebe?",a:["18"],hint:"Traži se broj metara."},
+ {q:"Brodicom snage motora veće od 15 kW smije upravljati osoba s navršenih koliko godina i s kojim uvjerenjem? (oba podatka)",all:true,req:[["18"],["b","kategorije b","kategorija b"]],hint:"Odgovor mora imati i dob i slovo kategorije."},
+ {q:"Koju maksimalnu duljinu i snagu motora smije imati brodica kojom upravlja voditelj kategorije A za osobne potrebe? (oba podatka)",all:true,req:[["7"],["15"]],hint:"Treba navesti i metre i kW."},
+ {q:"Što je navigacija? Objasni jednom rečenicom.",a:["vođenje brodice","vodenje brodice","luke polazišta","luke odredišta","iz luke u luku"],hint:"Misli na put od početne do odredišne luke.",textarea:true},
+ {q:"Koja ustanova izrađuje i izdaje sve publikacije za pomorce u RH?",a:["hrvatski hidrografski institut","hhi"],hint:"Ima sjedište u Splitu, kratica s tri slova."},
+ {q:"U kojem gradu je sjedište te ustanove (HHI)?",a:["split"],hint:"Veći dalmatinski grad."},
+ {q:"Čime se moraju ažurirati pomorske karte?",a:["oglas za pomorce","oglasi za pomorce","ozp"],hint:"Publikacija s kraticom OZP."},
+ {q:"Kako se zove priručnik koji ima ulogu vodiča s podacima o lukama, zaljevima i sidrištima?",a:["peljar"],hint:"Postoji verzija za more i za male brodove."},
+ {q:"Kojom bojom je na karti označeno kopno?",a:["žut","zut"],hint:"Topla boja."},
+ {q:"Kojom bojom su na karti dubine manje od 10 metara?",a:["plav"],hint:"Boja mora."},
+ {q:"Kojom bojom su na karti dubine veće od 10 metara?",a:["bijel"],hint:"Bez boje, prazno."},
+ {q:"Što označava plavo područje omeđeno istočkanim krugom s križićem u sredini?",a:["dubinu manju od 2","manje od 2 m","manju od 2 metra","2 metra"],hint:"Vrlo plitko, broj metara.",diagram:"karta",cap:"Boje i oznake na pomorskoj karti"},
+ {q:"Što na karti označavaju crvene vijugave linije?",a:["podmorske kabele","kabel"],hint:"Struja, telefon i slično."},
+ {q:"Što na karti označavaju crvene i crne isprekidane linije?",a:["podmorske cjevovode","cjevovod"],hint:"Voda, nafta, plin kroz cijev."},
+ {q:"Koje su dvije radnje zabranjene gdje su na karti ucrtane podmorske instalacije?",all:true,req:[["sidrenje","sidriti"],["koćarenje","kocarenje","koćariti"]],hint:"Jedna se tiče sidra, druga ribarske mreže."},
+ {q:"Što označava crveno prekriženo sidro na morskom području karte?",a:["zabranu sidrenja","zabrana sidrenja"],hint:"Vrsta zabrane."},
+ {q:"Što označava normalno crno sidro na morskom području karte?",a:["preporučljivo sidrište","preporucljivo sidriste","sidrište za sve brodove"],hint:"Dobro mjesto, ali ne za sve vrste tereta."},
+ {q:"Što označava crveno sidro u uokvirenom području?",a:["sidrište za brodove s opasnim","opasne tvari","opasne terete"],hint:"Posebna vrsta tereta."},
+ {q:"Što označavaju brojevi na morskom području karte?",a:["dubinu mora","dubina"],hint:"Vrijednost izražena u metrima."},
+ {q:"Što označavaju slova na morskom području karte?",a:["vrstu morskog dna","vrsta dna","morsko dno"],hint:"Bitno pri sidrenju."},
+ {q:"Što označava slovo M na karti kao oznaka dna?",a:["mulj"],hint:"Vrlo mekano, sitno dno; počinje na slovo M."},
+ {q:"Što označava slovo P na karti kao oznaka dna?",a:["pijesak"],hint:"Mekano, zrnato dno."},
+ {q:"Što označava slovo K na karti kao oznaka dna?",a:["kamen"],hint:"Tvrdo dno."},
+ {q:"Koje je dno najpogodnije za sidrenje?",a:["meko","mulj","pijesak"],hint:"Sidro se mora dobro ukopati."},
+ {q:"Za lijepa vremena, koliko puta dubinu se preporuča ispustiti sidrenog lanca?",a:["tri do četiri","3 do 4","tri","četiri","cetiri","3","4"],hint:"Mali raspon brojeva."},
+ {q:"Kako se zove priručnik koji daje podatke o pomorskim svjetlima?",a:["popis svjetala i signala za maglu","popis svjetala"],hint:"Sadrži i podatke o zvučnim signalima u magli."},
+ {q:"Što je IALA?",a:["međunarodno udruženje svjetioničarskih","tehnički forum","medunarodno udruzenje"],hint:"Tijelo koje usklađuje rad nacionalnih službi.",textarea:true},
+ {q:"Koja organizacija u RH postavlja i održava objekte sigurnosti plovidbe (balisažu)?",a:["plovput"],hint:"Tvrtka sa sjedištem u Splitu."},
+ {q:"Koja dva sustava pomorskih oznaka postoje?",all:true,req:[["lateralni","bočni","bocni"],["kardinalni"]],hint:"Jedan označava strane prolaza, drugi se veže uz strane svijeta."},
+ {q:"Što se označava lateralnim sustavom?",a:["lijeva odnosno desna strana kanala","strana kanala","ulazi u luke"],hint:"Strane plovnog prolaza.",textarea:true},
+ {q:"Kojom bojom su u zoni A oznake desne strane kanala?",a:["zelen"],hint:"Ista boja kao kod semafora za prolaz."},
+ {q:"Kojom bojom su u zoni A oznake lijeve strane kanala?",a:["crven"],hint:"Boja zabrane."},
+ {q:"U koju zonu spada cijela Europa uključujući Jadran?",a:["zonu a","zona a","a"],hint:"Označava se slovom."},
+ {q:"Što se označava kardinalnim sustavom?",a:["sigurne strane","najdublje vode","ploviti pored opasnosti"],hint:"Govori kojom stranom proći oko opasnosti.",textarea:true},
+ {q:"Koje su boje oznake kardinalnog sustava?",all:true,req:[["žut","zut"],["crn"]],hint:"Dvije boje, jedna topla jedna tamna.",diagram:"kardinalni",cap:"Kardinalni sustav – kvadranti"},
+ {q:"Između kojih interkardinalnih smjerova je sjeverni (N) kvadrant?",all:true,req:[["nw","sjeverozapad"],["ne","sjeveroistok"]],hint:"Dva smjera koji sadrže slovo sjevera."},
+ {q:"Što znači oznaka 'V pl' bez broja na karti?",a:["vidi plan","malo područje važno za plovidbu"],hint:"Upućuje na detaljniji prikaz."},
+ {q:"Za koji razmjer kažemo da je krupniji i da je karta bogatija podacima?",a:["manji"],hint:"Suprotno od većeg."},
+ {q:"Koje je boje simbol za pomorsko svjetlo na karti?",a:["crven"],hint:"Upadljiva topla boja."},
+ {q:"Što označava oznaka usamljene opasnosti (crno-crveno-crna, dvije kugle)?",a:["opasnost za plovidbu","opasnost"],hint:"Treba je zaobići promjenom kursa."},
+ {q:"Što sve sadrži karakteristika pomorskog svjetla? Nabroji barem tri.",a:["boju","način svijetljenja","period","visinu","domet"],hint:"Pet podataka po kojima razlikuješ svjetlo: izgled, trajanje, visina iznad mora i koliko daleko se vidi.",textarea:true},
+ {q:"U karakteristici B C Bl (4) 10s 21m 15-10 M, što znači broj (4)?",a:["četiri u grupi","4 u grupi","cetiri bljeska","bljeskove u grupi"],hint:"Broj u zagradi se odnosi na bljeskove."},
+ {q:"Što znači 'Izo' u karakteristici svjetla?",a:["izofazno","jednako trajanje svjetla i tame"],hint:"Svjetlo i tama traju isto."},
+ {q:"Za koliko stupnjeva se razlikuju smjer vjetra i smjer struje?",a:["180"],hint:"Suprotni smjerovi."},
+ {q:"Prema čemu se računa smjer vjetra?",a:["iz kojega dolazi","odakle dolazi","prema smjeru iz kojega"],hint:"Sjeverni vjetar dolazi sa sjevera."},
+ {q:"Prema čemu se računa smjer struje?",a:["u koji ide","kamo ide","prema smjeru u koji ulazi"],hint:"Suprotno pravilu za vjetar."},
+ {q:"Što je KURS broda? Definiraj.",a:["kut","sjeverojužnica","meridijan","uzdužnica","pramcem"],hint:"Kut između sjeverojužnice i uzdužnice broda.",textarea:true},
+ {q:"Kojim priborom se na karti određuje kurs?",a:["dva navigacijska trokuta","navigacijski trokut","trokut"],hint:"Pribor s pravim kutom, koristi se u paru."},
+ {q:"Koji raspon vrijednosti u stupnjevima može imati kurs?",a:["0 - 360","0 do 360","0-360"],hint:"Od nule do punog kruga."},
+ {q:"U kojem smjeru se računa kurs na ruži kompasa?",a:["kazaljke na satu","smjeru kazaljke"],hint:"Kao na satu.",diagram:"kompas",cap:"Ruža kompasa – kvadranti i smjerovi"},
+ {q:"Koliko stupnjeva označava Istok (E)?",a:["90"],hint:"Četvrtina punog kruga."},
+ {q:"Koliko stupnjeva označava Jug (S)?",a:["180"],hint:"Pola punog kruga."},
+ {q:"Koliko stupnjeva označava Zapad (W)?",a:["270"],hint:"Tri četvrtine punog kruga."},
+ {q:"Koji kvadrant obuhvaća raspon od 90° do 180°?",a:["ii","2","drugi"],hint:"Redni broj nakon prvog."},
+ {q:"Koji je najvažniji dio magnetskog kompasa i od kakvog materijala mora biti?",all:true,req:[["kotao","kotla"],["nemagnetsk"]],hint:"Glavni dio + svojstvo materijala vezano uz magnetizam."},
+ {q:"Pomoću čega je kotao kompasa pričvršćen da ruža ostane u ravnom položaju?",a:["kardanskog sustava","kardanski sustav","kardan"],hint:"Poseban sustav ovjesa."},
+ {q:"Što je AZIMUT?",a:["kut","sjeverojužnica","meridijan","smjer na objekt","smjerom na neki objekt"],hint:"Kut između sjeverojužnice i smjera prema nekom objektu.",textarea:true},
+ {q:"U čemu se izražava brzina u navigaciji?",a:["čvorovima","cvorovima","milja na sat"],hint:"Pomorska jedinica brzine."},
+ {q:"Ako za jedan sat prijeđemo 7 milja, kojom brzinom plovimo?",a:["7 čvorova","7 cvorova","7"],hint:"Izračunaj iz definicije čvora."},
+ {q:"Ako 20 milja prijeđemo za 4 sata, kolika je prosječna brzina?",a:["5 čvorova","5 cvorova","5"],hint:"Put podijeljen vremenom."},
+ {q:"Kojim uređajem se mjeri dubina?",a:["dubinomjer","ehosonder"],hint:"Radi na principu jeke."},
+ {q:"Približno koja je brzina širenja ultrazvuka kroz vodu?",a:["1500"],hint:"Oko tisuću i pol metara u sekundi."},
+ {q:"U čemu se izražava udaljenost u navigaciji?",a:["nautičkim miljama","nautickim miljama","milje","milja"],hint:"Pomorska mjerna jedinica."},
+ {q:"Koliko metara ima jedna nautička milja?",a:["1852"],hint:"Vezana uz jednu minutu zemljopisne širine."},
+ {q:"Koliko kabela ima jedna milja?",a:["10"],hint:"Okrugli broj."},
+ {q:"Koliko minuta ima jedan stupanj na karti?",a:["60"],hint:"Kao minuta u satu."},
+ {q:"Kojim priborom se mjeri udaljenost na karti?",a:["šestar","sestar","navigacijskim šestarom"],hint:"Ima dva kraka."},
+ {q:"Kojim dvjema koordinatama se definira pozicija na Zemlji?",all:true,req:[["širin","sirin"],["dužin","duzin"]],hint:"Jedna ide od ekvatora, druga od Greenwicha."},
+ {q:"Što nam kazuje zemljopisna širina?",a:["udaljeni od ekvatora","udaljenost od ekvatora"],hint:"Mjeri se prema sjeveru ili jugu."},
+ {q:"Koju vrijednost ima širina na ekvatoru, a koju na polovima? (oba)",all:true,req:[["0"],["90"]],hint:"Nula na jednom kraju, najveća na drugom."},
+ {q:"Što nam kazuje zemljopisna dužina?",a:["od početnog meridijana","od grinviča","od greenwicha","nultog meridijana"],hint:"Mjeri se prema istoku ili zapadu."},
+ {q:"Koji predznak za širinu uvijek ima cijeli Jadran?",a:["n","sjever"],hint:"Slovo strane svijeta."},
+ {q:"Koji predznak za dužinu uvijek ima cijeli Jadran?",a:["e","istok"],hint:"Slovo strane svijeta."},
+ {q:"Kako možemo odrediti poziciju u obalnoj navigaciji opažanjem objekata?",a:["dva ili više azimuta","azimuta poznatih objekata","istovremenim opažanjem azimuta"],hint:"Mjerenjem više kutova na poznate objekte."},
+ {q:"Pomoću koja tri elementa uvijek možemo odrediti približnu (zbrojenu) poziciju?",all:true,req:[["kurs"],["vrijem"],["brzin"]],hint:"Trebaš tri podatka: u kojem smjeru ploviš, koliko dugo i koliko brzo.",textarea:true},
+ {q:"Koja je osnovna zadaća radara?",a:["otkrivanje objekata","slabe vidljivosti","izbjegavanje sudara"],hint:"Korisan kad se slabo vidi.",textarea:true},
+ {q:"Kojom brzinom se šire radarski valovi?",a:["brzinom svjetlosti","300000","300.000","svjetlost"],hint:"Najveća poznata brzina u prirodi."},
+ {q:"Što je GPS?",a:["satelitski navigacijski sustav","global positioning"],hint:"Pozicija pomoću satelita."},
+ {q:"Što je ECDIS?",a:["elektronički sustav karata","electronic chart display","karte u elektroničkom obliku"],hint:"Karte prikazane na monitorima."}
+]},
+{num:"2",title:"Motoristika i zaštitne mjere",sub:"Predmet 2",questions:[
+ {q:"Koje gorivo koristi dizel motor?",a:["naftu","plinsko ulje","nafta"],hint:"Nije benzin."},
+ {q:"Koje gorivo koristi benzinski (Otto) motor?",a:["benzin","petrolej","mješavinu","mjesavinu"],hint:"Može biti i mješavina s uljem."},
+ {q:"Koje tri isprave dobijemo prilikom kupovine motora?",all:true,req:[["račun","racun"],["jamčevni","jamcevni","jamstvo"],["naputak"]],hint:"Dokaz plaćanja, dokument koji jamči ispravnost i upute za rukovanje.",textarea:true},
+ {q:"Kako se kod dvotaktnog motora na mješavinu vrši podmazivanje?",a:["automatski","mješavinom","mjesavinom"],hint:"Bez zasebnog spremnika ulja."},
+ {q:"Na koja tri načina se motor može upućivati (pokretati)?",all:true,req:[["ručno","rucno"],["električno","elektricno"],["zrak","komprimiranim"]],hint:"Rukom, pomoću struje ili pomoću komprimiranog medija.",textarea:true},
+ {q:"Gdje se kod benzinskog motora miješaju zrak i gorivo?",a:["rasplinjač","karburator","rasplinjacu"],hint:"Dio s dva naziva."},
+ {q:"Što kod benzinskog motora pali mješavinu u cilindru?",a:["iskra","svjećica","svjecica"],hint:"Element koji daje varnicu."},
+ {q:"Ima li dizel motor rasplinjač i svjećicu?",a:["ne","nema"],hint:"Da ili ne."},
+ {q:"Do koje temperature se kod dizela zagrije zrak sabijanjem klipa?",a:["700"],hint:"Visoka temperatura, oko sedam stotina."},
+ {q:"Što kod dizel motora ubrizgava raspršeno gorivo u zagrijani zrak?",a:["visokotlačna pumpa","visokotlacna pumpa","rasprskač","rasprskac"],hint:"Pumpa pod visokim tlakom."},
+ {q:"Kako dolazi do paljenja goriva u dizel motoru?",a:["samozapaljenj"],hint:"Bez iskre, samo od topline."},
+ {q:"Koja su četiri takta četverotaktnog motora redom?",all:true,req:[["usis"],["kompresij"],["ekspanzij"],["ispuh"]],hint:"Ulaz, sabijanje, rad, izlaz.",textarea:true,diagram:"cetverotakt",cap:"Taktovi rada motora"},
+ {q:"Koja su dva takta dvotaktnog motora?",all:true,req:[["izmjena medija","izmjena"],["izgaranje","ekspanzij"]],hint:"Prvi spaja izmjenu i kompresiju, drugi rad.",textarea:true},
+ {q:"Imaju li dvotaktni motori ventile?",a:["ne","nemaju"],hint:"Da ili ne (imaju kanale)."},
+ {q:"Koja su moguća punjenja protupožarnog aparata?",a:["prah","pjenu","vodu","co2","pjena"],hint:"Četiri vrste, jedna je plin.",textarea:true},
+ {q:"Što treba provjeriti prije upućivanja motora? Nabroji barem tri.",a:["gorivo","ulje","hlađenje","hladenje","akumulator","sustav za hlađenje"],hint:"Provjeri ono čime motor radi, čime se podmazuje, kako se hladi i izvor struje.",textarea:true},
+ {q:"Što treba učiniti s ventilom za ulaz mora nakon gašenja motora?",a:["zatvoriti"],hint:"Suprotno od otvaranja."},
+ {q:"Što se nikada ne smije zaboraviti učiniti s tim ventilom prije upućivanja?",a:["otvoriti"],hint:"Inače motor ostaje bez hlađenja."},
+ {q:"Koja dva tipa hlađenja motora postoje?",all:true,req:[["zračn","zracn"],["voden"]],hint:"Jedno koristi zrak, drugo tekućinu."},
+ {q:"Koja dva tipa vodenog hlađenja postoje?",all:true,req:[["izravn","direktn"],["neizravn","indirektn"]],hint:"Jedno more ide ravno u motor, drugo motor hladi preko izmjenjivača."},
+ {q:"Koje je vodeno hlađenje jeftinije i češće u uporabi?",a:["izravno","direktno"],hint:"Jednostavnije rješenje."},
+ {q:"Što pokazuje manometar na motoru?",a:["tlak ulja","tlak"],hint:"Vezano uz podmazivanje."},
+ {q:"Što pokazuje termometar na motoru?",a:["temperaturu rashladnog","temperaturu","temperatura"],hint:"Vezano uz hlađenje."},
+ {q:"Što treba učiniti prije krcanja goriva na postaji? Nabroji barem dvije radnje.",a:["iskrcati osobe","zabrani pušenja","aparat u pripravu","zatvoriti otvore","natpis"],hint:"Tiče se osoba, pušenja, aparata i otvora.",textarea:true},
+ {q:"Tko mora uvijek biti u blizini mjesta za utakanje goriva?",a:["voditelj"],hint:"Odgovorna osoba na brodici."},
+ {q:"Od kakvog lima moraju biti podnice u strojarskom prostoru?",a:["rebrastog","protuklizajućeg","protuklizajuceg","rebrasti"],hint:"Da se ne klizi."},
+ {q:"Kolika mora biti visina ograde iznad palube kod putničke brodice s potpunom palubom?",a:["80"],hint:"U centimetrima, manje od metra."},
+ {q:"Koliki je maksimalni razmak između prečaka ograde?",a:["20"],hint:"U centimetrima."},
+ {q:"Koliku visinu pune ograde na vratima nadgrađa moraju imati ribarske brodice?",a:["30"],hint:"U centimetrima."},
+ {q:"Što treba učiniti prije upućivanja benzinskog motora u zatvorenom prostoru?",a:["provjetriti","provjetren","zračnim ventilatorom","ventilator"],hint:"Tiče se zraka u prostoru."},
+ {q:"Tko je odgovoran za radnje suprotne propisima iz oblasti pomorstva?",a:["voditelj"],hint:"Glavna osoba na brodici."},
+ {q:"Zašto na brodici mora biti posuda za otpadna ulja?",a:["ne smiju u more","ne smiju se odlagati u more","onečišćenje"],hint:"Zaštita mora."},
+ {q:"Što je zajednički naziv 'ulje' kod onečišćenja mora?",a:["nafta i derivati","nafta i svi njeni derivati","sve vrste goriva"],hint:"Obuhvaća naftu i sve iz nje."},
+ {q:"Što voditelj mora učiniti pri isteku ulja u more? (dvije obaveze)",all:true,req:[["mjere protiv širenja","ograđivanje","posušivanje","protiv sirenja"],["kapetanij"]],hint:"Spriječiti širenje i obavijestiti nadležne.",textarea:true},
+ {q:"Kakvu struju daje akumulator?",a:["istosmjernu","istosmjerna"],hint:"Nije izmjenična."},
+ {q:"Što je elektrolit kod olovnog akumulatora?",a:["sumporna kiselina","razrijeđena sumporna"],hint:"Kiselina."},
+ {q:"Što je elektrolit kod čeličnog akumulatora?",a:["kalijeva lužina","kalijeva luzina"],hint:"Lužina."},
+ {q:"Najmanje koliko cm iznad ćelija mora biti razina elektrolita?",a:["1"],hint:"Jedan centimetar."},
+ {q:"Čime se dolijeva ako razina elektrolita opadne?",a:["destiliranom vodom","destilirana voda"],hint:"Posebna pročišćena voda."},
+ {q:"Što se zbraja kad se akumulatori spoje u seriju?",a:["napon"],hint:"Mjeri se u voltima."},
+ {q:"Što se zbraja kad se akumulatori spoje paralelno?",a:["struja"],hint:"Mjeri se u amperima."}
+]},
+{num:"3",title:"Pomorstvo, propisi i meteorologija",sub:"Predmet 3",questions:[
+ {q:"Što je brod prema duljini ili broju putnika? (jedan kriterij dovoljan)",a:["veća od 15","15 metara","više od 12 putnika","12 putnika"],hint:"Granica duljine ili granica broja putnika.",textarea:true},
+ {q:"Koliko putnika je ovlašten prevoziti putnički brod?",a:["više od 12","preko 12","12"],hint:"Granični broj putnika."},
+ {q:"Što je jahta? Navedi ključne kriterije.",a:["sport i razonodu","veća od 15","do 12 osoba"],hint:"Za užitak, duljina i ograničenje osoba.",textarea:true},
+ {q:"Koja je dopuštena duljina trupa brodice? (donja i gornja granica)",all:true,req:[["2,5","2.5"],["15"]],hint:"Najmanja i najveća dopuštena duljina.",textarea:true},
+ {q:"Koliko putnika najviše smije prevoziti brodica?",a:["12"],hint:"Granični broj."},
+ {q:"Što je gliser?",a:["klizi po površini","klizi po povrsini","brodica koja klizi"],hint:"Ne plovi, nego klizi."},
+ {q:"Do koje je duljine osobno plovilo na vodomlazni pogon?",a:["manje od 4","4 metra","4"],hint:"Mala duljina u metrima."},
+ {q:"Tko su 'osobe u brodici'?",all:true,req:[["posad"],["putni"]],hint:"Dvije skupine ljudi na plovilu."},
+ {q:"Tko se NE smatra putnikom?",a:["djeca ispod jedne godine","djeca ispod 1","zaposleni","osobe zaposlene"],hint:"Bebe i osoblje.",textarea:true},
+ {q:"Što je bruto tonaža (BT)?",a:["zapremnina","volumen","baždarenje","bazdarenje"],hint:"Veličina prostora plovila."},
+ {q:"Je li neto tonaža manja ili veća od bruto tonaže?",a:["manja"],hint:"NT u odnosu na BT."},
+ {q:"Kako izgleda oznaka brodice za osobne potrebe? Daj primjer.",a:["slova pa broj","st 123456","dva slova pa nib"],hint:"Prvo luka, pa broj."},
+ {q:"Kako izgleda oznaka brodice za gospodarske namjene? Daj primjer.",a:["broj pa slova","123456 st","nib pa dva slova"],hint:"Prvo broj, pa luka."},
+ {q:"Kako izgleda oznaka javne brodice? Daj primjer.",a:["rh","rh 123456 st"],hint:"Počinje s dva slova države."},
+ {q:"Koja se isprava izdaje brodici za koju je utvrđena sposobnost za plovidbu?",a:["upisni list"],hint:"Vezano uz upisnik brodova."},
+ {q:"Koje dvije isprave moraju uvijek biti na brodici u plovidbi?",all:true,req:[["upisni list"],["uvjerenje"]],hint:"Jedna za brodicu, druga za osobu.",textarea:true},
+ {q:"Koje tri vrste pregleda brodice postoje?",all:true,req:[["osnovni"],["redovni"],["izvanredni"]],hint:"Prvi pri upisu, redoviti periodični, te onaj koji se radi nakon nesreće.",textarea:true},
+ {q:"Kada se obavlja osnovni pregled?",a:["prije upisa","poslije obnove","promjene namjene"],hint:"Prije ulaska u upisnik."},
+ {q:"Koliko često se obavlja redovni pregled brodica za gospodarske namjene (do 20 god)?",a:["svake dvije","2 godine","dvije godine"],hint:"Razmak u godinama."},
+ {q:"Kada je izvanredni pregled obavezan? Nabroji barem dva slučaja.",a:["nesreću","nasukanje","sudar","požar","pozar","potapanje","promjene namjene"],hint:"Nesreća, sumnja, popravak, promjena namjene.",textarea:true},
+ {q:"U kojem roku se mora prijaviti pomorska nezgoda kapetaniji?",a:["12 sati","12"],hint:"Broj sati, manje od pola dana."},
+ {q:"Tko vrši pregled jahti?",a:["hrvatski registar brodova","hrb"],hint:"Tijelo s kraticom HRB."},
+ {q:"Koje područje plovidbe ima ograničenje od 20 Nm od obale?",a:["ii","2","područje ii"],hint:"Drugo područje po redu.",diagram:"podrucja",cap:"Područja plovidbe"},
+ {q:"Koje područje ima ograničenje od 12 Nm od obale?",a:["iii","3","područje iii"],hint:"Treće područje po redu."},
+ {q:"Koliko Nm od obale dopušta ograničenje IIIa?",a:["6"],hint:"Broj milja."},
+ {q:"Koliko Nm od obale dopušta ograničenje IIIb?",a:["3"],hint:"Broj milja, manji od IIIa."},
+ {q:"Koliko Nm od obale dopušta ograničenje IIIc?",a:["1"],hint:"Najmanji broj milja."},
+ {q:"Što obuhvaća područje plovidbe IV?",a:["luke","zaljev","ušća rijeka","rijeke"],hint:"Najzaštićenija područja uz kopno.",textarea:true},
+ {q:"U kojem području smije isključivo ploviti osobno plovilo na vodomlazni pogon?",a:["iiic","3c"],hint:"Najuže ograničenje područja III."},
+ {q:"Koja projektna kategorija pokriva sva područja plovidbe?",a:["a","kategorija a"],hint:"Prvo slovo abecede."},
+ {q:"Navedi barem tri tipa brodice prema tipu gradnje.",a:["pasara","gajeta","guc","leut","batana","jedrilica"],hint:"Tradicionalni dalmatinski tipovi.",textarea:true},
+ {q:"Po čemu se prepoznaje pasara?",a:["odsječenu krmu","zrcalo","odsjecenu krmu"],hint:"Oblik stražnjeg dijela."},
+ {q:"Najviše koliko osoba se istovremeno smije prevoziti brodicom kraćom od 2,5 m?",a:["dvije","2"],hint:"Vrlo mali broj."},
+ {q:"Nabroji četiri dimenzije brodice.",all:true,req:[["duljin"],["širin","sirin"],["visin"],["gaz"]],hint:"Tri prostorne mjere plus uron u vodu.",textarea:true},
+ {q:"Što je stabilnost brodice?",a:["vraća u ravan položaj","vraca u ravan polozaj","svojstvo da se vraća"],hint:"Reakcija na vanjske sile.",textarea:true},
+ {q:"Kako treba rasporediti teže terete u brodici?",a:["pri dnu","na dno","pri samom dnu"],hint:"Po visini, niže ili više?"},
+ {q:"Što od obvezne opreme moraju imati skuter i jet ski?",all:true,req:[["narukvic"],["retrovizor","ogledalo"]],hint:"Nešto što nosiš na zglobu i zaustavlja motor, te nešto za gledanje iza.",textarea:true},
+ {q:"Što osobe na skuteru i jet skiu moraju imati na sebi?",all:true,req:[["prsluk"],["kacig"]],hint:"Zaštita za plutanje i zaštita glave.",textarea:true},
+ {q:"Nabroji četiri najčešća uzla iz skripte.",all:true,req:[["muški","muski"],["zastavni"],["vrzni"],["pašnjak","pasnjak"]],hint:"Četiri praktična uzla iz priloga skripte; jedan se veže uz zastavu, jedan uz životinju koja pase.",textarea:true},
+ {q:"Što je meteorologija?",a:["fizička svojstva atmosfere","proučava atmosferu","znanost koja proučava"],hint:"Znanost o atmosferi."},
+ {q:"Koja su tri najvažnija meteorološka elementa?",all:true,req:[["temperatur"],["tlak"],["vlažn","vlazn","vlag"]],hint:"Toplina, pritisak i para u zraku.",textarea:true},
+ {q:"Što je vrijeme (meteorološki)?",a:["trenutačno stanje atmosfere","trenutno stanje atmosfere","stanje atmosfere"],hint:"Stanje u tom trenutku."},
+ {q:"Kako se zove najniži sloj atmosfere (do cca 10 km)?",a:["troposfera"],hint:"Počinje na 'tropo'."},
+ {q:"Čime se mjeri atmosferski tlak i u čemu se izražava? (oba)",all:true,req:[["barometr","aneroid"],["hektopaskal","hpa"]],hint:"Instrument plus mjerna jedinica.",textarea:true},
+ {q:"Čime se mjeri vlažnost zraka i u čemu se izražava? (oba)",all:true,req:[["higrometr"],["postoc","posto","%"]],hint:"Instrument za vlagu, a mjerna jedinica je relativni udio izražen kao dio od sto.",textarea:true},
+ {q:"Ispod koje vidljivosti kažemo da je magla?",a:["jednog kilometra","1 km","1 kilometar","ispod 1"],hint:"Mjeri se u kilometrima."},
+ {q:"Što je magla?",a:["kondenzirane vodene pare","skup sitnih čestica","pri površini"],hint:"Pojava nisko nad morem koja smanjuje vidljivost ispod kilometra.",textarea:true},
+ {q:"Što je vjetar?",a:["strujanje zraka","iz višeg prema nižem tlaku","horizontalno strujanje"],hint:"Kretanje zraka zbog razlike tlaka.",textarea:true},
+ {q:"Iz kojeg smjera puše bura?",a:["sjeveroistok","ne","nordista"],hint:"Smjer između sjevera i istoka.",diagram:"vjetrovi",cap:"Vjetrovi na Jadranu"},
+ {q:"Koji je najopasniji vjetar na Jadranu?",a:["bura"],hint:"Hladan vjetar s kopna na refule."},
+ {q:"Koji su predznaci za buru? Nabroji barem dva.",a:["kapa od bijelih oblaka","suhi zrak","oseka","porast tlaka","kapa oblaka"],hint:"Kapa na planinama, suh zrak, niska voda.",textarea:true},
+ {q:"Iz kojeg smjera puše jugo (šiloko)?",a:["jugoistok","se","saudista"],hint:"Smjer između juga i istoka."},
+ {q:"Koji su predznaci za jugo? Nabroji barem dva.",a:["sumaglica","povećana vlažnost","plima","pad tlaka","oblačnost"],hint:"Magličasta pojava na obzoru, vlažan zrak i visoka voda.",textarea:true},
+ {q:"Koji je ugodni ljetni vjetar koji puše isključivo danju?",a:["maestral"],hint:"Vjetar s NW, godi jedriličarima."},
+ {q:"Što je nevera?",a:["ljetna oluja","kratkotrajna oluja","oluja koja se ne može predvidjeti"],hint:"Kratka i jaka ljetna pojava."},
+ {q:"Iz kojeg smjera dolazi nevera?",a:["nw do sw","sjeverozapad do jugozapad","nw-sw"],hint:"Raspon od sjeverozapada do jugozapada."},
+ {q:"Kakvo vrijeme donosi anticiklona, a kakvo ciklona? (oba)",all:true,req:[["anticiklon","lijepo"],["ciklon","ružno","ruzno","loše"]],hint:"Sustav visokog tlaka donosi jedno, sustav niskog tlaka suprotno vrijeme.",textarea:true},
+ {q:"U kojem smjeru struji zrak u cikloni na sjevernoj polukugli?",a:["obrnuto od kazaljke","suprotno kazaljci","obrnutom od smjera kazaljke"],hint:"Suprotno satu."},
+ {q:"Tko izrađuje meteorološko izvješće za Jadran?",a:["državni hidrometeorološki zavod","dhmz","pomorski meteorološki centar","pmc"],hint:"Državni zavod za hidrologiju i meteorologiju, preko pomorskog centra u Splitu."},
+ {q:"Kako se dijele oblaci po visini?",all:true,req:[["nisk"],["srednj"],["visok"]],hint:"Tri kategorije po visini.",textarea:true},
+ {q:"Što je plima, a što oseka? (oboje)",all:true,req:[["plima","uzdizanj"],["oseka","spuštanj","spustanj"]],hint:"Jedna diže more, druga ga spušta.",textarea:true},
+ {q:"Kolika je najveća razlika visokih i niskih voda na Jadranu?",a:["0,9","0.9","0,9 m"],hint:"Manje od jednog metra."},
+ {q:"Kojim se elementima definiraju valovi?",all:true,req:[["dužin","duzin"],["visin"],["period"]],hint:"Horizontalni razmak vrhova, okomita mjera od dola do brijega i vrijeme između dva vrha.",textarea:true},
+ {q:"U kojem smjeru kruži morska struja u Jadranu?",a:["obrnuto od kazaljke","suprotno kazaljci","obrnuto od smjera kazaljke"],hint:"Ulazi uz istočnu obalu, izlazi niz Italiju."}
+]},
+{num:"4",title:"Manevriranje, sigurnost i prva pomoć",sub:"Predmet 4",questions:[
+ {q:"Što je manevriranje?",a:["vještina upravljanja","vjestina upravljanja","pri pristajanju"],hint:"Vještina koja se primjenjuje kod prilaska obali, spuštanja sidra i plovidbe po oluji.",textarea:true},
+ {q:"Koje su vanjske sile koje djeluju na brodicu?",a:["struja","valovi","plitko more","vjetar"],hint:"Četiri utjecaja iz okoline: gibanje morske mase, uzburkana površina, gibanje zraka i plićina.",textarea:true},
+ {q:"Koje su unutarnje sile koje djeluju na brodicu?",a:["vijak","kormilo","sidreni","privezni konopi","sidro"],hint:"Dijelovi samog plovila.",textarea:true},
+ {q:"Kako se okreće desnokretni vijak pri vožnji naprijed?",a:["udesno","desno","u desnu"],hint:"Smjer u nazivu."},
+ {q:"Na koju stranu se javlja izboj krme kod lijevokretnog vijka pri vožnji krmom?",a:["udesno","desno","u desnu"],hint:"Suprotno smjeru okretanja vijka."},
+ {q:"Kako se kod brodice s dva vijka okreću vijci?",a:["suprotnim smjerovima","prema vani","suprotno"],hint:"Jedan na jednu, drugi na drugu stranu."},
+ {q:"Kako okrećemo brodicu s dva vijka udesno?",all:true,req:[["lijev"],["desn"]],hint:"Jedan stroj naprijed, drugi krmom.",textarea:true},
+ {q:"Od kojih se dijelova sastoji kormilarski uređaj?",a:["list kormila","ruda","uzdi","kormilarsko kolo"],hint:"Četiri dijela: ravna ploča u vodi, poluga na njoj, prijenosni mehanizam i ono što kormilar drži.",textarea:true},
+ {q:"Do koliko stupnjeva se klasično kormilo može zakrenuti u stranu?",a:["35"],hint:"Oko trideset i nešto."},
+ {q:"Koje je najpogodnije dno za sidrenje?",a:["muljevito","pjeskovito","mekano","mulj","pijesak"],hint:"Dno u koje se sidro lako ukopa, suprotno od kamenitog."},
+ {q:"Za lijepog vremena, koliko puta dubinu se ispušta sidrenog lanca?",a:["četiri","4","cetiri"],hint:"Broj između tri i pet, za lijepa vremena."},
+ {q:"Što je lazni prostor pri sidrenju?",a:["površina kruga","krug u kojem se okreće","radijusa sidro-krma"],hint:"Krug u kojem se brodica može okretati."},
+ {q:"Što odmah moramo učiniti s kormilom pri padu osobe u more?",a:["sve u stranu pada","sve u stranu","u stranu pada osobe"],hint:"Da osobu ne zahvati vijak."},
+ {q:"Kako se zove okret kojim se vraćamo na mjesto pada osobe u more?",a:["obični okret","obicni okret","obican okret"],hint:"Jednostavni okret kod malih plovila."},
+ {q:"Kako se zove okret koji izvode veliki brodovi (do 400 m i više)?",a:["williamsonov","vilijamsonov"],hint:"Nosi prezime."},
+ {q:"Što su 'bau trasteri'?",a:["vijci u pramcu","pramčani potiskivači","pramcani potiskivaci","u pramčanom dijelu"],hint:"Pomažu okretati pramac."},
+ {q:"Koje je boje i koliki luk osvjetljava jarbolno svjetlo? (oba)",all:true,req:[["bijel"],["225"]],hint:"Boja plus stupnjevi.",diagram:"sektori",cap:"Sektori navigacijskih svjetala"},
+ {q:"Koje je boje i koliki luk osvjetljava krmeno svjetlo? (oba)",all:true,req:[["bijel"],["135"]],hint:"Boja plus stupnjevi."},
+ {q:"Koje su boje bočna svjetla i na kojoj strani? (oba)",all:true,req:[["zelen"],["crven"]],hint:"Jedno na desnoj, drugo na lijevoj strani.",textarea:true},
+ {q:"Koliki luk obzora osvjetljava svako bočno svjetlo?",a:["112,5","112.5"],hint:"Sto i nešto stupnjeva."},
+ {q:"Koliki luk obzora osvjetljava kružno svjetlo?",a:["360"],hint:"Puni krug."},
+ {q:"Koje je boje svjetlo za tegljenje i gdje se postavlja? (oba)",all:true,req:[["žut","zut"],["iznad krmenog","krm"]],hint:"Boja plus položaj prema krmenom svjetlu."},
+ {q:"Koliko traje jedan kratki signal?",a:["jednu sekundu","1 sekundu","1 s","jedna sekunda"],hint:"Vrlo kratko."},
+ {q:"Koliko traje jedan dugi signal?",a:["4 - 6","4 do 6","4-6","četiri do šest"],hint:"Raspon u sekundama."},
+ {q:"Koje su boje i kolikog promjera dnevni znakovi? (oba)",all:true,req:[["crn"],["60","30"]],hint:"Boja plus mjere u centimetrima.",diagram:"dnevni",cap:"Dnevni znakovi"},
+ {q:"Kada se svjetla pokazuju u plovidbi?",a:["od zalaska do izlaska sunca","noću","slabe vidljivosti"],hint:"Vremenski raspon vezan uz Sunce, plus situacije smanjene vidljivosti.",textarea:true},
+ {q:"Koje svjetlo mora pokazivati motorna brodica kraća od 7 m i sporija od 7 čvorova?",a:["jedno bijelo kružno","bijelo kružno","bijelo kruzno"],hint:"Jedno svjetlo, vidljivo svuda."},
+ {q:"Koja svjetla pokazuje motorna brodica duljine do 12 metara?",all:true,req:[["bočn","bocn"],["kružn","kruzn"]],hint:"Svjetla sa strana plus jedno koje se vidi sa svih strana."},
+ {q:"Koja svjetla pokazuje brod na mehanički pogon do 50 metara?",all:true,req:[["jarboln"],["bočn","bocn"],["krmen"]],hint:"Tri vrste svjetala.",textarea:true},
+ {q:"Koliko jarbolnih svjetala pokazuje brod dulji od 50 metara?",a:["dva","2"],hint:"Više od jednog."},
+ {q:"Što mora imati u pripremi brodica na vesla/jedra kraća od 7 m?",a:["ručnu svjetiljku","fenjer","bijelo svjetlo","rucnu svjetiljku"],hint:"Prijenosni izvor svjetla koji se drži spreman za slučaj rizika od sudara."},
+ {q:"Što pokazuje usidreni brod (noću)?",a:["bijelo kružno na pramcu","kružno bijelo na pramčanom","bijelo kruzno na pramcu"],hint:"Jedno svjetlo na prednjem dijelu."},
+ {q:"Koja svjetla pokazuje brod nesposoban za manevriranje?",a:["dva crvena kružna","2 crvena kruzna","dva crvena u okomici"],hint:"Dva ista svjetla u okomici."},
+ {q:"Koja svjetla pokazuje nasukani brod?",a:["dva crvena kružna","dva crvena i usidreni","2 crvena kruzna"],hint:"Dva crvena plus svjetla usidrenog.",textarea:true},
+ {q:"Koja svjetla pokazuje brod ograničene sposobnosti manevriranja?",a:["crveno bijelo crveno","crveno-bijelo-crveno","tri kružna"],hint:"Tri svjetla, redoslijed boja."},
+ {q:"Koja svjetla pokazuje brod ograničen svojim gazom?",a:["tri crvena kružna","3 crvena kruzna","tri crvena u okomici"],hint:"Tri ista svjetla."},
+ {q:"Koja svjetla pokazuje brod koji čisti mine i kolika je zabrana prilaska? (oba)",all:true,req:[["tri zelena","3 zelena","zelena u križ"],["1000","500"]],hint:"Tri kružna svjetla iste boje (boja sigurnosti), plus dvije udaljenosti zabrane prilaska.",textarea:true},
+ {q:"Koja svjetla pokazuje brod zauzet koćarenjem?",a:["zeleno iznad bijelog","zeleno iznad bijelog kružna"],hint:"Dva svjetla, zeleno gore."},
+ {q:"Koja svjetla pokazuje brod zauzet ribolovom osim koćarenja?",a:["crveno iznad bijelog","crveno iznad bijelog kružna"],hint:"Dva svjetla, crveno gore."},
+ {q:"Koja svjetla pokazuje peljarski brod (pilotina) u službi?",a:["bijelo iznad crvenog","bijelo iznad crvenog kružna"],hint:"Dva svjetla, bijelo gore."},
+ {q:"Koji dnevni znak ističe usidreni brod?",a:["crnu kuglu","kuglu na pramcu","crna kugla"],hint:"Jedan okrugli znak."},
+ {q:"Koji dnevni znak ističe brod nesposoban za manevriranje?",a:["dvije crne kugle","2 crne kugle"],hint:"Dva okrugla znaka."},
+ {q:"Koji dnevni znak ističe nasukani brod?",a:["tri crne kugle","3 crne kugle"],hint:"Tri okrugla znaka."},
+ {q:"Koji dnevni znak ističe motorni jedrenjak kad plovi?",a:["čunj s vrhom prema dolje","cunj vrh dolje","crni čunj prema dolje"],hint:"Stožac okrenut prema dolje."},
+ {q:"Koji dnevni znak ističe brod ograničen svojim gazom?",a:["valjak","cilindar","crni valjak"],hint:"Cilindrični oblik."},
+ {q:"Što označava jedan kratki zvučni signal (.)?",a:["kursa udesno","skretanje udesno","promjenu kursa udesno"],hint:"Promjena smjera, desno ili lijevo?"},
+ {q:"Što označavaju dva kratka signala (..)?",a:["kursa ulijevo","skretanje ulijevo","promjenu kursa ulijevo"],hint:"Promjena smjera, suprotno od jednog signala."},
+ {q:"Što označavaju tri kratka signala (...)?",a:["vožnju krmom","vožnja krmom","kretanje krmom","unatrag"],hint:"Smjer kretanja suprotan od naprijed."},
+ {q:"Što označava pet ili više kratkih signala?",a:["upozorenje","ne razumiju namjere","upozorenje drugom brodu"],hint:"Daje se kad namjere nisu jasne."},
+ {q:"Kojim signalom se brod oglašava kad nailazi iza rta i ne vidi drugu stranu?",a:["jednim dugim","jedan dugi","dugi signal"],hint:"Jedan signal, dugi ili kratki?"},
+ {q:"Je li dopušteno pretjecanje u uskim kanalima i tjesnacima?",a:["ne","nije","u pravilu nije"],hint:"Da ili ne."},
+ {q:"Kojim signalom brod traži dopuštenje za pretjecanje s desne strane?",a:["dva duga i jedan kratki","dva duga jedan kratki","2 duga 1 kratki"],hint:"Dva duga plus jedan kratki."},
+ {q:"Kojim signalom brod traži dopuštenje za pretjecanje s lijeve strane?",a:["dva duga i dva kratka","dva duga dva kratka","2 duga 2 kratka"],hint:"Dva duga plus dva kratka."},
+ {q:"Kojim signalom upitani brod odgovara da se slaže s pretjecanjem?",a:["dugi kratki dugi kratki","jedan dugi jedan kratki jedan dugi jedan kratki"],hint:"Naizmjence dugi i kratki, četiri signala."},
+ {q:"U kojim razmacima se brodovi oglašavaju sirenom u magli?",a:["dvije minute","2 minute"],hint:"Razmak u minutama."},
+ {q:"Kako se u magli oglašava usidreni i nasukani brod?",a:["zvonom","gongom","zvonom i gongom","zvono"],hint:"Ne sirenom, nego drugim metalnim zvučnim napravama."},
+ {q:"Kako se u magli oglašava brod na mehanički pogon u plovidbi?",a:["jednim dugim","jedan dugi","dugi signal"],hint:"Jedan signal."},
+ {q:"Kako se u magli oglašava brod koji plovi ali se ne kreće kroz vodu?",a:["dva duga","s dva duga","2 duga"],hint:"Jedan signal više nego brod koji se aktivno kreće kroz vodu u magli."},
+ {q:"Kod susreta dvaju brodova iz suprotnog smjera, na koju stranu svaki mijenja kurs?",a:["udesno","desno","u desno"],hint:"Oba na istu stranu.",diagram:"sudar",cap:"Križanje kurseva – pravo prvenstva"},
+ {q:"Kod križanja kurseva, koji brod izbjegava?",a:["koji vidi drugoga preko desne","s desne strane","koji vidi drugog s desne"],hint:"Onaj kojem drugi dolazi s određene strane."},
+ {q:"Kako se utvrđuje rizik sudara s brodom koji dolazi s desne strane?",a:["pramčanim kutom","pramčani kut","kut na brod koji dolazi"],hint:"Promatra se određeni kut."},
+ {q:"Ako se pramčani kut ne mijenja, što to znači?",a:["rizik od sudara","opasnost od sudara","postoji rizik"],hint:"Opasnost."},
+ {q:"Smije li jedrenjak presijecati kurs brodu kojeg pretječe?",a:["ne","nikada","ne smije"],hint:"Da ili ne."},
+ {q:"Kad dva jedrenjaka primaju vjetar u različiti bok, koji izbjegava?",a:["koji prima vjetar u lijevi","lijevi bok","s lijeve strane"],hint:"Onaj s vjetrom u određeni bok."},
+ {q:"Kad dva jedrenjaka primaju vjetar u isti bok, koji izbjegava?",a:["onaj u privjetrini","privjetrina","koji ima jači vjetar"],hint:"Onaj koji je 'gore' u odnosu na vjetar."},
+ {q:"Koji brod ima prednost: onaj koji izlazi ili koji ulazi u luku?",a:["koji izlazi","onaj koji izlazi","izlazi"],hint:"Izlazak ili ulazak."},
+ {q:"Što je pomorska nesreća? Nabroji barem tri događaja.",a:["požar","eksplozija","sudar","nasukavanje","udar","oštećenje","pozar"],hint:"Niz ozbiljnih događaja: vatra, naglo rasprskavanje, naletanje na drugi brod ili na dno.",textarea:true},
+ {q:"Smije li se napustiti mjesto sudara prije nego se utvrdi da su osobe na drugoj brodici sigurne?",a:["ne","ne smije"],hint:"Da ili ne."},
+ {q:"Što se prvenstveno mora spašavati?",a:["osobe","ljudi","prvo osobe"],hint:"Prvo ono živo, pa tek onda materijalno."},
+ {q:"Pripada li naknada za spašavanje osoba?",a:["ne","ne pripada","nema naknade"],hint:"Da ili ne."},
+ {q:"Pripada li naknada za spašavanje imovine?",a:["da","pripada","pravična","pravicna"],hint:"Da ili ne."},
+ {q:"Što voditelj radi ako se brodica ne može spasiti, a treba je maknuti s puta?",a:["nasukati na pogodno tlo","nasukati","maknuti s puta i nasukati"],hint:"Maknuti je s plovnog puta i posjesti na dno."},
+ {q:"Na koje dvije skupine dijelimo sredstva za spašavanje?",all:true,req:[["osobn"],["zajednič","zajednic"]],hint:"Jedna za pojedinca, druga za sve.",textarea:true},
+ {q:"Nabroji barem dva osobna sredstva za spašavanje.",a:["prsluk","kolut","odijelo","termo-zaštitna","termo zastita"],hint:"Sredstva za pojedinca: ono što se obuče oko tijela, plutajući obruč, zaštitno ronilačko ruho i zaštita od pothlađenja.",textarea:true},
+ {q:"Nabroji barem dva zajednička sredstva za spašavanje.",a:["brodica za spašavanje","splav","spasilačka brodica","brza spasilačka"],hint:"Sredstva za sve odjednom: manje plovilo za spašavanje, naprava na napuhavanje i posebna brza brodica.",textarea:true},
+ {q:"Tko određuje količinu sredstava za spašavanje za brodice?",a:["lučka kapetanija","kapetanija","ispostava"],hint:"Nadležno tijelo za brodice."},
+ {q:"Iz koje konvencije je proizašla SAR služba?",a:["sar konvencije","konvencije za traganje i spašavanje","sar"],hint:"Kratica iste tri slova kao i služba."},
+ {q:"Gdje je sjedište Nacionalne središnjice za traganje i spašavanje i koji je broj telefona? (oba)",all:true,req:[["rijek"],["195"]],hint:"Grad u Kvarneru plus tri znamenke.",textarea:true},
+ {q:"Što se priznaje uz predočenje vozačke dozvole u sklopu programa?",a:["prva pomoć","prva pomoc","pružanje prve pomoći"],hint:"Dio gradiva o povredama."}
+]},
+{num:"5",title:"Pomorska radiotelefonska služba",sub:"Predmet 5",questions:[
+ {q:"Koje uvjerenje mora barem imati osoba koja rukuje VHF postajom na brodici?",a:["kategorije b","b","voditelja brodice kategorije b"],hint:"Slovo kategorije voditelja."},
+ {q:"Koja isprava je potrebna da bi se VHF postaja legalno ugradila i koristila?",a:["dozvolu za radijsku postaju","dozvola za radijsku postaju","dozvola"],hint:"Vrsta dozvole za plovilo."},
+ {q:"Tko izdaje 'Dozvolu za radijsku postaju na plovilu'?",a:["hakom"],hint:"Regulatorna agencija u Zagrebu."},
+ {q:"Kakav karakter ima Dozvola i do kada vrijedi? (oba)",all:true,req:[["trajn"],["otpis"]],hint:"Ne istječe periodično, vrijedi sve do brisanja plovila ili postaje.",textarea:true},
+ {q:"S kim vlasnik mora sklopiti ugovor za korištenje postaje u komercijalne svrhe?",a:["plovput"],hint:"Tvrtka iz Splita."},
+ {q:"Koje tri obalne radijske postaje (ORP) ima PLOVPUT?",all:true,req:[["split"],["dubrovnik"],["rijek"]],hint:"Tri grada plus riječ radio.",textarea:true},
+ {q:"Što je 'Radio dnevnik'?",a:["knjiga","vodi vlasnik ili voditelj","dnevnik rada postaje"],hint:"Obavezni zapisnik u koji se bilježi rad postaje tijekom putovanja."},
+ {q:"Gdje se Radio dnevnik mora ovjeriti prije početka vođenja?",a:["kapetaniji","u kapetaniji","ispostavi"],hint:"Nadležno tijelo."},
+ {q:"Koje tri isprave moraju biti na brodici s VHF postajom?",all:true,req:[["upisni list"],["uvjerenje"],["dozvola"]],hint:"Za brodicu, za osobu i za postaju.",textarea:true},
+ {q:"Koji je međunarodni VHF kanal za pogibelj, poziv i sigurnost?",a:["16"],hint:"Dvoznamenkasti broj."},
+ {q:"Koja je frekvencija VHF kanala 16?",a:["156,8","156.8","156,8 mhz"],hint:"Oko 157 MHz."},
+ {q:"Na kojem VHF kanalu lučke kapetanije vrše neprekidnu službu bdijenja?",a:["10"],hint:"Dvoznamenkasti broj."},
+ {q:"Na kojem VHF kanalu marine i lučice vrše službu bdijenja?",a:["17"],hint:"Dvoznamenkasti broj."},
+ {q:"Na kojem VHF kanalu lučke uprave (LOC) vrše službu bdijenja?",a:["09","9"],hint:"Jednoznamenkasti broj."},
+ {q:"Na kojem VHF kanalu dežuraju peljarska društva?",a:["12"],hint:"Dvoznamenkasti broj."},
+ {q:"Je li dopušteno korištenje VHF postaje u luci?",a:["ne","nije","osim za lučke operacije"],hint:"Općenito ne, uz iznimke."},
+ {q:"Koji se priručnik preporuča držati pokraj postaje radi sricanja?",a:["tablicu za govorno sricanje","tablica sricanja","međunarodnu tablicu"],hint:"Tablica za sricanje slova i brojeva."},
+ {q:"Tko obavlja inspekciju radio uređaja na brodicama?",a:["inspektor sigurnosti plovidbe","radio-inspektor","republički inspektori"],hint:"Inspektor iz lučke kapetanije."},
+ {q:"Na kojem VHF kanalu se NE smije vršiti provjera ispravnosti rada postaje?",a:["16"],hint:"Kanal za pogibelj."},
+ {q:"Gdje se na brodici smješta VHF postaja?",a:["najvišem mogućem mjestu","nadohvat voditelju","blizu mjesta upravljanja"],hint:"Visoko zbog antene, blizu voditelja.",textarea:true},
+ {q:"Čime se identificira radijska postaja na brodici?",a:["oznakom ili imenom brodice","ime i vrsta brodice","oznaka brodice"],hint:"Oznaka ili ime plus vrsta plovila."},
+ {q:"Kako se identificira Obalna radijska postaja (ORP)?",a:["imenom grada i riječi radio","ime grada i radio","grad radio"],hint:"Grad plus riječ radio."},
+ {q:"Tko dodjeljuje pozivni znak (call sign)?",a:["hakom"],hint:"Ista agencija koja izdaje dozvolu."},
+ {q:"Koji je pozivni znak za Split radio?",a:["9as","9 a s"],hint:"Počinje s 9A pa slovo grada."},
+ {q:"Što označava '9A' u pozivnom znaku?",a:["državnu pripadnost","hrvatsku","država"],hint:"Pripadnost zemlji."},
+ {q:"Na kojem se kanalu najčešće uspostavlja veza prije prelaska na radni kanal?",a:["16"],hint:"Kanal bdijenja."},
+ {q:"Najduže koliko smije trajati pozivanje na kanalu 16 radi uspostave veze?",a:["jedne minute","1 minute","jedna minuta"],hint:"Vrlo kratko vrijeme."},
+ {q:"Koja je posljedica nepoštivanja ograničenja na kanalu 16?",all:true,req:[["kazn","novčan","novcan"],["oduzimanje","uvjerenj"]],hint:"Financijska sankcija i moguć gubitak prava upravljanja.",textarea:true},
+ {q:"U kojem frekvencijskom području je VHF pomorski radio promet?",a:["156 i 174","156-174","između 156 i 174"],hint:"Raspon oko 156 do 174 MHz."},
+ {q:"Koliko je ukupno izvedeno VHF kanala?",a:["56"],hint:"Više od pedeset."},
+ {q:"Koji VHF kanal nije za govor (digitalno selektivno pozivanje)?",a:["70"],hint:"Sedamdeset."},
+ {q:"Što znači simpleksni kanal?",a:["ista frekvencija","ne mogu istovremeno govoriti","prijemnik i odašiljač na istoj"],hint:"Naizmjenični razgovor, jedna frekvencija.",textarea:true},
+ {q:"Koju riječ izgovaramo kad želimo dati riječ sugovorniku na simpleksu?",a:["prijem","over"],hint:"Hrvatski ili engleski izraz za predaju riječi."},
+ {q:"Koje riječi izgovaramo kad je razgovor potpuno završen?",a:["gotovo i prekid","over and out","gotovo i prekid rada"],hint:"Završne riječi razgovora."},
+ {q:"Koji je signal za pogibelj i kada se daje?",all:true,req:[["mayday","mejdej"],["životn","zivotn","opasnost"]],hint:"Riječ koja se ponavlja tri puta, daje se kad svima na plovilu prijeti smrtna ugroza.",textarea:true},
+ {q:"Tko isključivo donosi odluku o odašiljanju signala pogibelji?",a:["voditelj","zapovjednik","voditelj ili zapovjednik"],hint:"Glavna osoba na plovilu."},
+ {q:"Što barem mora sadržavati poruka pogibelji? Nabroji sve.",all:true,req:[["ime","oznak","pozivni"],["pozicij"],["opasnost"],["pomoć","pomoc"]],hint:"Četiri podatka: identitet plovila, gdje se nalazi, kakva je nevolja i što treba od drugih.",textarea:true},
+ {q:"Kako voditelj izgovara Mayday postupak?",a:["tri puta mejdej","tri puta mayday","3x mayday jednom ovdje 3x ime"],hint:"Tri puta riječ, jednom ovdje, tri puta ime.",textarea:true},
+ {q:"Koji se signal odašilje ako druga postaja sazna za tuđu pogibelj?",a:["mayday relay","mejdej rilej"],hint:"Relejna verzija glavnog signala."},
+ {q:"Kojim riječima se traži prestanak rada drugih postaja na kanalu 16?",a:["silans mejdej","silence mayday","silans mayday"],hint:"Naredba tišine na kanalu."},
+ {q:"Kojim riječima se objavljuje kraj akcije i prestanak šutnje?",a:["silans fini","silence fini"],hint:"Kraj nametnute tišine."},
+ {q:"Koji je signal za žurnost i kada se daje?",all:true,req:[["pan pan"],["motor","vijak","kormil","povreda","bez životne","kvar"]],hint:"Dvije iste riječi; daje se kod tehničkih problema i ozljeda kad nema smrtne ugroze.",textarea:true},
+ {q:"Što se izgovara za traženje liječničkog savjeta?",a:["pan pan medico","medico"],hint:"Žurni signal plus posebna riječ."},
+ {q:"Koji je signal za sigurnost i kada se daje?",all:true,req:[["securite","sekurite"],["sigurnost","predmet","mina","plutač","plutac","nevrijem"]],hint:"Francuska riječ; daje se kad je na neki način ugrožena plovidba na moru.",textarea:true},
+ {q:"Poredaj signale po prioritetu od najvišeg.",all:true,req:[["mayday","mejdej"],["pan pan"],["securite","sekurite"]],hint:"Tri signala, od najvažnijeg prema manje važnom.",textarea:true},
+ {q:"Od čega se sastoji radio telegram? Nabroji barem tri dijela.",a:["službenog dijela","adrese","teksta","potpisa","plaćene oznake","sluzbeni dio"],hint:"Dio koji popunjava operater, podaci o primatelju, sama poruka, podaci o pošiljatelju.",textarea:true},
+ {q:"Najviše koliko znakova smije sadržavati jedna riječ u telegramu?",a:["10"],hint:"Okrugli broj znakova."},
+ {q:"Od kojih se dijelova sastoji brodska VHF postaja?",all:true,req:[["primopredajnik","prijemnik"],["mikrotelefon","mikrofon"],["antena"],["napajanj","izvor"]],hint:"Uređaj koji prima i šalje, dio koji se drži u ruci za govor, dio koji zrači valove te ono što daje struju.",textarea:true},
+ {q:"Kakvom strujom se mora napajati VHF postaja na brodici?",a:["istosmjernom","istosmjerna"],hint:"Ista vrsta koju daje akumulator."},
+ {q:"Čemu služi Volume (voljum) kontrola?",all:true,req:[["uključ","ukljuc","isključ","iskljuc"],["jačin","jacin","ton"]],hint:"Paljenje uređaja plus glasnoća.",textarea:true},
+ {q:"Na koji kanal se postaja automatski postavi kad ju uključimo?",a:["16"],hint:"Kanal bdijenja."},
+ {q:"Čemu služi Squelch (skvelč) kontrola?",a:["otklanjanje smetnji","otklanjanje šumova","uklanjanje smetnji"],hint:"Uklanja šumove."},
+ {q:"Smije li se Squelch postaviti na maksimum? Zašto?",all:true,req:[["ne"],["signal","slabe","pogibelj","gubimo"]],hint:"Razmisli što se dogodi s dalekim i tihim pozivima u nevolji ako kontrolu pojačaš do kraja.",textarea:true},
+ {q:"Koja je najjača dozvoljena izlazna snaga VHF postaje?",a:["25"],hint:"U vatima."},
+ {q:"Koliki je domet VHF postaje?",a:["20 do 30","20-30","od 20 do 30"],hint:"Raspon u miljama."},
+ {q:"Čemu služi Dual watch (djuel voč) kontrola?",a:["slušanje kanala 16 i drugog","praćenje dva kanala","istovremeno slušanje"],hint:"Funkcija koja ti dopušta da ne propustiš kanal bdijenja dok pratiš neki radni kanal."},
+ {q:"Od čega se sastoji mikrotelefonska kombinacija?",all:true,req:[["slušalic","slusalic"],["mikrofon"],["prekidač","prekidac","taster"]],hint:"Dio kroz koji čuješ, dio u koji govoriš i tipka za uključivanje odašiljača.",textarea:true},
+ {q:"Kako se sriče slovo C po međunarodnoj tablici?",a:["čarli","carli","charlie"],hint:"Englesko ime na slovo C."},
+ {q:"Kako se sriče slovo Q po međunarodnoj tablici?",a:["kvibek","quebec"],hint:"Kanadski grad."},
+ {q:"Kako se sriče slovo W po međunarodnoj tablici?",a:["viski","whiskey"],hint:"Vrsta pića."},
+ {q:"Kada je u potpunosti ušao u primjenu GMDSS sustav?",a:["1999","01.02.1999","1. veljače 1999","01. 02. 1999"],hint:"Godina krajem devedesetih."},
+ {q:"Što znači kratica GMDSS?",a:["global maritime distress and safety","svjetski pomorski sustav pogibelji i sigurnosti"],hint:"Svjetski sustav pogibelji i sigurnosti."},
+ {q:"Koliko područja plovidbe ima GMDSS sustav?",a:["četiri","4","cetiri"],hint:"Od A1 do A4."},
+ {q:"Kojem GMDSS morskom području mora udovoljiti RH?",a:["a1","područje a1"],hint:"Domet VHF-a."},
+ {q:"Od koliko znamenki se sastoji MMSI broj?",a:["devet","9"],hint:"Jednoznamenkasti broj."},
+ {q:"Što označavaju prva tri broja MMSI-ja?",a:["državu zastave","država zastave","drzavu zastave"],hint:"Pripadnost državi."},
+ {q:"Nabroji barem dva vizualna signala pogibelji.",a:["crvene rakete","buktinje","dimne kutije","dizanje i spuštanje ruku","sos svjetiljkom"],hint:"Pirotehnika u zraku, plamen u ruci, obojeni dim, pokreti rukama, svjetlosni SOS.",textarea:true},
+ {q:"Što je SOS signal (ritam)?",a:["tri kratka tri duga tri kratka","3 kratka 3 duga 3 kratka"],hint:"Simetričan ritam: kratko-dugo-kratko."},
+ {q:"Jesu li brodice za osobne potrebe obvezne imati VHF postaju?",a:["ne","nisu"],hint:"Da ili ne."}
+]}
+];
+
+
+/* ---------- POTPUNI TOČNI ODGOVORI ---------- */
+// Potpuni točni odgovori po cjelini (0-index) i pitanju (0-index)
+const SOLS = {
+0:{ // PREDMET 1 – Navigacija
+ 0:"16 godina.",
+ 1:"15 godina.",
+ 2:"18 godina.",
+ 3:"Do 18 metara duljine jahte.",
+ 4:"Osoba s navršenih 18 godina i uvjerenjem za voditelja brodice kategorije B.",
+ 5:"Brodica duljine najviše 7 metara i snage motora najviše 15 kW.",
+ 6:"Navigacija je vještina vođenja brodice iz luke polazišta u luku odredišta najsigurnijim i najkraćim putem.",
+ 7:"Hrvatski hidrografski institut (HHI).",
+ 8:"Split.",
+ 9:"Oglasima za pomorce (OZP).",
+ 10:"Peljar (Peljar Jadranskog mora, odnosno Peljar za male brodove).",
+ 11:"Žutom bojom.",
+ 12:"Plavom bojom.",
+ 13:"Bijelom bojom.",
+ 14:"Da je dubina manja od 2 metra (vrlo plitko).",
+ 15:"Podmorske kabele (električni, telefonski i slično).",
+ 16:"Podmorske cjevovode (vodovod, naftovod, plinovod).",
+ 17:"Sidrenje i koćarenje.",
+ 18:"Zabranu sidrenja.",
+ 19:"Preporučljivo sidrište za sve brodove osim onih koji prevoze opasne terete.",
+ 20:"Sidrište namijenjeno brodovima koji prevoze opasne terete (opasne tvari).",
+ 21:"Dubinu mora, uvijek izraženu u metrima.",
+ 22:"Vrstu morskog dna.",
+ 23:"Mulj.",
+ 24:"Pijesak.",
+ 25:"Kamen.",
+ 26:"Meko dno (mulj ili pijesak), jer se u njega sidro dobro ukopa.",
+ 27:"Tri do četiri puta dubinu mora.",
+ 28:"Popis svjetala i signala za maglu.",
+ 29:"IALA je Međunarodno udruženje svjetioničarskih službi, tehnički forum koji usklađuje rad nacionalnih organizacija za sigurnost plovidbe.",
+ 30:"Plovput (sa sjedištem u Splitu).",
+ 31:"Lateralni (bočni) i kardinalni sustav.",
+ 32:"Lijeva i desna strana kanala, plovni prolazi i ulazi u luke.",
+ 33:"Zelenom bojom (noću zeleno svjetlo).",
+ 34:"Crvenom bojom (noću crveno svjetlo).",
+ 35:"U zonu A.",
+ 36:"Sigurne strane, to jest najdublje vode kojima treba ploviti oko opasnosti.",
+ 37:"Žuto-crne boje, s dva crna čunja na vrhu oznake.",
+ 38:"Između sjeverozapada (NW) i sjeveroistoka (NE).",
+ 39:"Vidi plan, to jest upućuje na detaljniji prikaz manjeg područja važnog za plovidbu.",
+ 40:"Manji razmjer (krupnija karta, bogatija podacima).",
+ 41:"Crvene boje.",
+ 42:"Opasnost za plovidbu koju treba sigurno izbjeći promjenom kursa.",
+ 43:"Boju svjetla, način svijetljenja, period, visinu iznad mora i domet.",
+ 44:"Broj bljeskova u jednoj grupi (ovdje četiri bljeska u grupi).",
+ 45:"Izofazno svjetlo, kod kojeg svjetlo i tama traju jednako dugo.",
+ 46:"Za 180 stupnjeva (suprotni su smjerovi).",
+ 47:"Prema smjeru iz kojega vjetar dolazi.",
+ 48:"Prema smjeru u koji struja ide (ulazi).",
+ 49:"Kurs je kut između sjeverojužnice (meridijana) i uzdužnice broda, mjeren u smjeru kazaljke na satu.",
+ 50:"S dva navigacijska trokuta.",
+ 51:"Od 0 do 360 stupnjeva.",
+ 52:"U smjeru kazaljke na satu.",
+ 53:"90 stupnjeva.",
+ 54:"180 stupnjeva.",
+ 55:"270 stupnjeva.",
+ 56:"II. (drugi) kvadrant.",
+ 57:"Kotao, koji mora biti od nemagnetskog materijala.",
+ 58:"Pomoću kardanskog sustava (kardanskog ovjesa).",
+ 59:"Azimut je kut između sjeverojužnice (meridijana) i smjera prema nekom objektu.",
+ 60:"U čvorovima (jedan čvor = jedna nautička milja na sat).",
+ 61:"7 čvorova.",
+ 62:"5 čvorova.",
+ 63:"Dubinomjerom (ehosonderom), na principu jeke (odbijanja ultrazvuka).",
+ 64:"Oko 1500 metara u sekundi.",
+ 65:"U nautičkim miljama.",
+ 66:"1852 metra.",
+ 67:"10 kabela.",
+ 68:"60 minuta.",
+ 69:"Navigacijskim šestarom.",
+ 70:"Zemljopisnom širinom i zemljopisnom dužinom.",
+ 71:"Koliko smo udaljeni od ekvatora (prema sjeveru ili jugu).",
+ 72:"0° na ekvatoru i 90° na polovima.",
+ 73:"Koliko smo udaljeni od početnog (nultog) meridijana kroz Greenwich.",
+ 74:"N (sjever).",
+ 75:"E (istok).",
+ 76:"Istovremenim opažanjem azimuta dvaju ili više poznatih objekata.",
+ 77:"Pomoću poznatog kursa, proteklog vremena i prosječne brzine (zbrojena pozicija).",
+ 78:"Otkrivanje objekata i izbjegavanje sudara u uvjetima slabe vidljivosti.",
+ 79:"Brzinom svjetlosti (oko 300.000 km/s).",
+ 80:"GPS je satelitski navigacijski sustav za određivanje pozicije.",
+ 81:"ECDIS je elektronički sustav prikaza pomorskih karata na monitorima."
+},
+1:{ // PREDMET 2 – Motoristika
+ 0:"Naftu (plinsko ulje).",
+ 1:"Benzin (ili mješavinu benzina i ulja).",
+ 2:"Račun, jamčevni list i naputak za rukovanje.",
+ 3:"Automatski, mješavinom (gorivo i ulje pomiješani zajedno).",
+ 4:"Ručno, električno i komprimiranim zrakom.",
+ 5:"U rasplinjaču (karburatoru).",
+ 6:"Iskra sa svjećice.",
+ 7:"Ne, dizel motor nema ni rasplinjač ni svjećicu.",
+ 8:"Oko 700 °C i više.",
+ 9:"Visokotlačna pumpa, kroz rasprskač.",
+ 10:"Samozapaljenjem goriva u jako zagrijanom zraku.",
+ 11:"1. usis, 2. kompresija, 3. ekspanzija (radni takt), 4. ispuh.",
+ 12:"1. izmjena medija i kompresija, 2. izgaranje i ekspanzija.",
+ 13:"Ne, dvotaktni motori nemaju ventile (imaju usisne i ispušne kanale).",
+ 14:"Prah, pjena, voda ili CO2.",
+ 15:"Količinu i dovod goriva, ulje za podmazivanje, sustav za hlađenje i akumulator.",
+ 16:"Zatvoriti ga.",
+ 17:"Otvoriti ga (inače motor ostaje bez hlađenja).",
+ 18:"Zračno i vodeno hlađenje.",
+ 19:"Izravno (direktno) i neizravno (indirektno).",
+ 20:"Izravno (direktno) hlađenje.",
+ 21:"Tlak ulja.",
+ 22:"Temperaturu rashladnog medija.",
+ 23:"Iskrcati sve osobe osim posade, postaviti natpis o zabrani pušenja, staviti protupožarni aparat u pripravu i zatvoriti sve otvore.",
+ 24:"Voditelj brodice.",
+ 25:"Od rebrastog (protuklizajućeg) lima.",
+ 26:"80 cm.",
+ 27:"20 cm.",
+ 28:"30 cm.",
+ 29:"Provjetriti prostor zračnim ventilatorom sigurnosne izvedbe.",
+ 30:"Voditelj brodice.",
+ 31:"Jer se otpadna ulja ne smiju odlagati u more.",
+ 32:"Nafta i svi njezini derivati (sve vrste goriva i ulja).",
+ 33:"Poduzeti mjere protiv širenja (ograđivanje, posušivanje) i izvijestiti najbližu lučku kapetaniju.",
+ 34:"Istosmjernu struju.",
+ 35:"Razrijeđena sumporna kiselina.",
+ 36:"Razrijeđena kalijeva lužina.",
+ 37:"Najmanje 1 cm iznad ćelija.",
+ 38:"Destiliranom vodom.",
+ 39:"Napon.",
+ 40:"Struja (jakost struje)."
+}
+};
+
+SOLS[2]={ // PREDMET 3 – Pomorstvo, propisi, meteorologija
+ 0:"Brod je plovni objekt duljine veće od 15 metara ili ovlašten za prijevoz više od 12 putnika.",
+ 1:"Više od 12 putnika.",
+ 2:"Jahta je plovni objekt za sport i razonodu, duljine veće od 15 metara, koji prevozi ne više od 12 osoba.",
+ 3:"Duljina trupa veća od 2,5 metra, a manja ili jednaka 15 metara.",
+ 4:"Najviše 12 putnika.",
+ 5:"Gliser je brodica koja klizi po površini mora pomoću mehaničkog pogona.",
+ 6:"Manje od 4 metra.",
+ 7:"Članovi posade i putnici.",
+ 8:"Djeca ispod jedne godine i osobe zaposlene na brodu (oni se ne smatraju putnicima).",
+ 9:"Zapremnina (volumen) plovila dobivena baždarenjem.",
+ 10:"Manja je od bruto tonaže.",
+ 11:"Dva slova luke pa NIB (broj), na primjer ST 123456.",
+ 12:"NIB (broj) pa dva slova luke, na primjer 123456 ST.",
+ 13:"Počinje s RH, pa NIB, pa slova luke, na primjer RH 123456 ST.",
+ 14:"Upisni list.",
+ 15:"Upisni list brodice i uvjerenje o osposobljenosti za voditelja brodice.",
+ 16:"Osnovni, redovni i izvanredni pregled.",
+ 17:"Prije upisa u Upisnik brodova, ili poslije obnove ili promjene namjene.",
+ 18:"Svake dvije godine.",
+ 19:"Kada brodica pretrpi nesreću (nasukanje, sudar, požar, potapanje), kod sumnje u sposobnost, nakon većih popravaka ili promjene namjene.",
+ 20:"U roku ne duljem od 12 sati.",
+ 21:"Hrvatski registar brodova (HRB).",
+ 22:"Područje plovidbe II.",
+ 23:"Područje plovidbe III.",
+ 24:"Do 6 Nm od najbliže obale.",
+ 25:"Do 3 Nm od najbliže obale.",
+ 26:"Do 1 Nm od najbliže obale.",
+ 27:"Luke, zaljeve, ušća rijeka i rijeke.",
+ 28:"Područje IIIc.",
+ 29:"Projektna kategorija A.",
+ 30:"Na primjer: pasara, gajeta, guc, leut, batana, gliser, jedrilica.",
+ 31:"Po odsječenoj krmi (zrcalu).",
+ 32:"Dvije osobe.",
+ 33:"Duljina, širina, visina i gaz.",
+ 34:"Stabilnost je svojstvo brodice da se nakon djelovanja vanjske sile vraća u ravan položaj.",
+ 35:"Pri samom dnu brodice.",
+ 36:"Sigurnosnu narukvicu i konveksni (povratni) retrovizor.",
+ 37:"Prsluke za spašavanje i sigurnosne kacige.",
+ 38:"Muški uzao, zastavni uzao, vrzni uzao i pašnjak.",
+ 39:"Meteorologija je znanost koja proučava fizička svojstva atmosfere.",
+ 40:"Temperatura zraka, atmosferski tlak i vlažnost zraka.",
+ 41:"Vrijeme je trenutačno stanje atmosfere nad nekim područjem.",
+ 42:"Troposfera.",
+ 43:"Barometrom (aneroidom), izražava se u hektopaskalima (hPa).",
+ 44:"Higrometrom, izražava se u postocima (relativna vlaga).",
+ 45:"Ispod jednog kilometra vidljivosti.",
+ 46:"Magla je skup sitnih čestica kondenzirane vodene pare pri površini zemlje/mora.",
+ 47:"Vjetar je horizontalno strujanje zraka iz područja višeg prema području nižeg tlaka.",
+ 48:"Iz sjeveroistoka (NE).",
+ 49:"Bura.",
+ 50:"Kapa od bijelih oblaka na planinama, suhi zrak, oseka i porast tlaka zraka.",
+ 51:"Iz jugoistoka (SE).",
+ 52:"Sumaglica na jugoistoku, povećana vlažnost, plima i pad tlaka zraka.",
+ 53:"Maestral.",
+ 54:"Nevera je kratkotrajna ljetna oluja koja se teško može predvidjeti.",
+ 55:"Iz smjera NW do SW (sjeverozapad do jugozapad).",
+ 56:"Anticiklona donosi lijepo vrijeme, a ciklona ružno (loše) vrijeme.",
+ 57:"Obrnuto od smjera kazaljke na satu.",
+ 58:"Državni hidrometeorološki zavod (DHMZ), preko Pomorskog meteorološkog centra (PMC) u Splitu.",
+ 59:"Na niske, srednje i visoke oblake.",
+ 60:"Plima je periodično uzdizanje, a oseka periodično spuštanje razine mora.",
+ 61:"Oko 0,9 metara.",
+ 62:"Dužinom, visinom i periodom vala.",
+ 63:"Obrnuto od smjera kazaljke na satu (ulazi uz istočnu obalu, izlazi niz Italiju)."
+};
+
+SOLS[3]={ // PREDMET 4 – Manevriranje, sigurnost, prva pomoć
+ 0:"Manevriranje je vještina upravljanja brodicom prilikom pristajanja, sidrenja, pretjecanja i plovidbe po nevremenu.",
+ 1:"Morska struja, valovi, plitko more i vjetar.",
+ 2:"Vijak, kormilo, sidreni uređaj i privezni konopi.",
+ 3:"Udesno (u desnu stranu).",
+ 4:"Udesno (u desnu stranu).",
+ 5:"U suprotnim smjerovima (prema vani).",
+ 6:"Lijevim strojem naprijed, a desnim strojem krmom (unatrag).",
+ 7:"List kormila, ruda kormila, uzde kormila i kormilarsko kolo.",
+ 8:"Do približno 35 stupnjeva u svaku stranu.",
+ 9:"Muljevito ili pjeskovito (mekano) dno.",
+ 10:"Otprilike četiri puta dubinu mora.",
+ 11:"Lazni prostor je površina kruga (radijusa sidro-krma) u kojem se usidrena brodica može okretati za 360°.",
+ 12:"Postaviti kormilo sve u stranu pada osobe, da je ne zahvati vijak.",
+ 13:"Obični okret.",
+ 14:"Williamsonov okret.",
+ 15:"Bau trasteri su vijci u pramčanom dijelu (pramčani potiskivači) koji pomiču pramac lijevo ili desno.",
+ 16:"Bijele boje, osvjetljava luk obzora od 225°.",
+ 17:"Bijele boje, osvjetljava luk obzora od 135°.",
+ 18:"Zeleno na desnom boku, crveno na lijevom boku.",
+ 19:"112,5 stupnjeva.",
+ 20:"360 stupnjeva.",
+ 21:"Žute boje, postavlja se iznad krmenog svjetla.",
+ 22:"Jednu sekundu.",
+ 23:"4 do 6 sekundi.",
+ 24:"Crne boje, promjera 60/30 cm.",
+ 25:"Od zalaska do izlaska sunca, te danju u uvjetima slabe vidljivosti.",
+ 26:"Jedno bijelo kružno svjetlo.",
+ 27:"Bočna svjetla i bijelo kružno svjetlo.",
+ 28:"Jarbolno svjetlo, bočna svjetla i krmeno svjetlo.",
+ 29:"Dva jarbolna svjetla.",
+ 30:"Ručnu svjetiljku ili fenjer s bijelim svjetlom.",
+ 31:"Jedno bijelo kružno svjetlo na pramčanom dijelu.",
+ 32:"Dva crvena kružna svjetla u okomici.",
+ 33:"Dva crvena kružna svjetla u okomici i svjetla usidrenog broda.",
+ 34:"Tri kružna svjetla u okomici: crveno-bijelo-crveno.",
+ 35:"Tri crvena kružna svjetla u okomici.",
+ 36:"Tri zelena kružna svjetla; ne smije mu se prilaziti bliže od 1000 metara po krmi i 500 metara po bokovima.",
+ 37:"Dva kružna svjetla: zeleno iznad bijelog.",
+ 38:"Dva kružna svjetla: crveno iznad bijelog.",
+ 39:"Dva kružna svjetla: bijelo iznad crvenog.",
+ 40:"Crnu kuglu (na pramčanom dijelu).",
+ 41:"Dvije crne kugle u okomici.",
+ 42:"Tri crne kugle u okomici.",
+ 43:"Crni čunj s vrhom prema dolje.",
+ 44:"Crni valjak (cilindar).",
+ 45:"Promjenu kursa udesno.",
+ 46:"Promjenu kursa ulijevo.",
+ 47:"Vožnju krmom (unatrag).",
+ 48:"Upozorenje, kada se ne razumiju namjere drugog broda.",
+ 49:"Jednim dugim zvučnim signalom.",
+ 50:"U pravilu nije dopušteno.",
+ 51:"Dva duga i jedan kratki signal.",
+ 52:"Dva duga i dva kratka signala.",
+ 53:"Jedan dugi, jedan kratki, jedan dugi, jedan kratki signal.",
+ 54:"U razmacima od najviše dvije minute.",
+ 55:"Zvonom i gongom, u razmacima od jedne minute.",
+ 56:"Jednim dugim zvučnim signalom.",
+ 57:"S dva duga zvučna signala.",
+ 58:"Svaki brod mijenja kurs udesno.",
+ 59:"Onaj brod koji drugoga vidi preko svoje desne strane.",
+ 60:"Promatra se pramčani kut na brod koji dolazi.",
+ 61:"Postoji rizik (opasnost) od sudara.",
+ 62:"Ne, nikada ne smije presijecati kurs brodu kojeg pretječe.",
+ 63:"Onaj koji prima vjetar u lijevi bok.",
+ 64:"Onaj koji je u privjetrini.",
+ 65:"Onaj brod koji izlazi iz luke.",
+ 66:"Požar, eksplozija, sudar, nasukavanje, udar i oštećenje od nevremena.",
+ 67:"Ne, ne smije se napustiti mjesto sudara prije nego se utvrdi sigurnost osoba.",
+ 68:"Prvenstveno osobe (ljudi).",
+ 69:"Ne, za spašavanje osoba ne pripada naknada.",
+ 70:"Da, za spašavanje imovine pripada pravična naknada.",
+ 71:"Maknuti brodicu s plovnog puta i nasukati je na pogodno tlo.",
+ 72:"Na osobna i zajednička sredstva za spašavanje.",
+ 73:"Prsluk za spašavanje, kolut za spašavanje, odijelo za spašavanje, termo-zaštitna sredstva.",
+ 74:"Brodica za spašavanje, splav za spašavanje, (brza) spasilačka brodica.",
+ 75:"Lučka kapetanija (ispostava lučke kapetanije).",
+ 76:"Iz SAR konvencije (Međunarodne konvencije za traganje i spašavanje).",
+ 77:"Sjedište je u Rijeci, izravni broj telefona je 195.",
+ 78:"Pružanje prve pomoći."
+};
+
+SOLS[4]={ // PREDMET 5 – Radiotelefonska služba
+ 0:"Uvjerenje za voditelja brodice kategorije B.",
+ 1:"Dozvola za radijsku postaju na plovilu.",
+ 2:"HAKOM (Hrvatska regulatorna agencija za mrežne djelatnosti).",
+ 3:"Ima trajni karakter i vrijedi do otpisa plovila ili postaje.",
+ 4:"S Plovputom iz Splita.",
+ 5:"Split radio, Dubrovnik radio i Rijeka radio.",
+ 6:"Radio dnevnik je knjiga rada radijske postaje koju vodi vlasnik ili voditelj brodice.",
+ 7:"U lučkoj kapetaniji ili njezinoj ispostavi.",
+ 8:"Upisni list brodice, uvjerenje o osposobljenosti za voditelja brodice i dozvola za radijsku postaju.",
+ 9:"Kanal 16.",
+ 10:"156,8 MHz.",
+ 11:"Kanal 10.",
+ 12:"Kanal 17.",
+ 13:"Kanal 09.",
+ 14:"Kanal 12.",
+ 15:"Nije dopušteno, osim za lučke operacije, manevar ili pogibelj.",
+ 16:"Međunarodnu tablicu za govorno sricanje slova i brojeva.",
+ 17:"Inspektor sigurnosti plovidbe (radio-inspektor) lučke kapetanije.",
+ 18:"Kanal 16.",
+ 19:"Na najvišem mogućem mjestu, nadohvat voditelju, blizu mjesta upravljanja.",
+ 20:"Oznakom ili imenom i vrstom brodice.",
+ 21:"Imenom grada i riječi 'radio' (na primjer Split radio).",
+ 22:"HAKOM.",
+ 23:"9A pa slovo grada (na primjer 9A za Split radio).",
+ 24:"Državnu pripadnost (Hrvatsku).",
+ 25:"Kanal 16.",
+ 26:"Najduže jedne minute.",
+ 27:"Novčana kazna i/ili oduzimanje uvjerenja.",
+ 28:"Između 156 i 174 MHz.",
+ 29:"56 kanala.",
+ 30:"Kanal 70.",
+ 31:"Simpleksni kanal znači da prijemnik i odašiljač rade na istoj frekvenciji, pa se ne može istovremeno govoriti i slušati.",
+ 32:"'Prijem' (over).",
+ 33:"'Gotovo i prekid rada' (over and out).",
+ 34:"MAYDAY; daje se kada plovilu i osobama prijeti životna opasnost.",
+ 35:"Voditelj ili zapovjednik plovila.",
+ 36:"Oznaku ili ime plovila, poziciju, vrstu opasnosti i vrstu tražene pomoći.",
+ 37:"Tri puta MAYDAY, jedan put 'ovdje', tri puta ime/oznaku plovila.",
+ 38:"MAYDAY RELAY.",
+ 39:"'SILANS MAYDAY' (silence mayday).",
+ 40:"'SILANS FINI' (silence fini).",
+ 41:"PAN PAN; daje se kod kvara ili povrede kad nema životne opasnosti.",
+ 42:"PAN PAN MEDICO.",
+ 43:"SECURITE; daje se kada je ugrožena sigurnost plovidbe (predmet u moru, ugašeno svjetlo i slično).",
+ 44:"MAYDAY, zatim PAN PAN, zatim SECURITE.",
+ 45:"Službeni dio, plaćena oznaka, adresa primatelja, tekst, adresa pošiljatelja i potpis.",
+ 46:"Najviše 10 znakova.",
+ 47:"Primopredajnik, mikrotelefonska kombinacija, antena i izvor napajanja.",
+ 48:"Istosmjernom strujom.",
+ 49:"Za uključivanje/isključivanje uređaja i regulaciju jačine tona.",
+ 50:"Kanal 16.",
+ 51:"Za otklanjanje smetnji (šumova) na kanalu.",
+ 52:"Ne; na maksimumu se smanjuje ulazni signal pa se gube slabi i daleki signali pogibelji.",
+ 53:"25 W.",
+ 54:"Od 20 do 30 milja.",
+ 55:"Za istovremeno slušanje kanala 16 i još jednog odabranog kanala.",
+ 56:"Slušalice, mikrofona i prekidača (tastera).",
+ 57:"Čarli (Charlie).",
+ 58:"Kvibek (Quebec).",
+ 59:"Viski (Whiskey).",
+ 60:"01. 02. 1999. (1. veljače 1999.).",
+ 61:"Global Maritime Distress and Safety System (Svjetski pomorski sustav pogibelji i sigurnosti).",
+ 62:"Četiri područja (A1, A2, A3, A4).",
+ 63:"Području A1 (domet VHF-a).",
+ 64:"Devet znamenki.",
+ 65:"Državu zastave brodice.",
+ 66:"Crvene rakete s padobranom, ručne buktinje, dimne kutije, ritmičko dizanje i spuštanje raširenih ruku, SOS svjetiljkom.",
+ 67:"Tri kratka, tri duga, tri kratka signala.",
+ 68:"Ne, brodice za osobne potrebe nisu obvezne imati VHF radijsku postaju."
+};
+
+
+/* ---------- STANJE ---------- */
+const progress={}; // si -> {gid:'correct'|'wrong'|'shown'}
+SECTIONS.forEach((s,i)=>progress[i]={});
+let currentSec=null;
+
+/* ---------- IZBORNIK ---------- */
+/* ---------- SRICANJE (vjezba) ---------- */
+// Medunarodna tablica
+const SPELL_ALPHA={
+ A:"Alfa", B:"Bravo", C:"Charlie", D:"Delta", E:"Echo", F:"Foxtrot",
+ G:"Golf", H:"Hotel", I:"India", J:"Juliett", K:"Kilo", L:"Lima",
+ M:"Mike", N:"November", O:"Oscar", P:"Papa", Q:"Quebec", R:"Romeo",
+ S:"Sierra", T:"Tango", U:"Uniform", V:"Victor", W:"Whiskey",
+ X:"X-ray", Y:"Yankee", Z:"Zulu"
+};
+// Brojevi u IMO/ITU pomorskoj sluzbi (slozenice: strana rijec za broj + engleska rijec)
+// U praksi se najcesce koristi obican engleski (one, two, three...).
+// Ovdje je full IMO oblik (Nada-Zero, Una-One...) i jednostavni engleski fallback.
+const SPELL_NUM={
+ "0":{full:"Nada-Zero", simple:"Zero"},
+ "1":{full:"Una-One",   simple:"One"},
+ "2":{full:"Bisso-Two", simple:"Two"},
+ "3":{full:"Terra-Three", simple:"Three"},
+ "4":{full:"Karte-Four", simple:"Four"},
+ "5":{full:"Panta-Five", simple:"Five"},
+ "6":{full:"Soxi-Six",  simple:"Six"},
+ "7":{full:"Sette-Seven", simple:"Seven"},
+ "8":{full:"Okto-Eight", simple:"Eight"},
+ "9":{full:"Nove-Nine", simple:"Nine"}
+};
+// Hrvatska slova s dijakritikom prema dogovoru u pomorskoj sluzbi (sricu se preko bliske latinske basis):
+// Č -> Charlie (slovo C), Ć -> Charlie, Š -> Sierra, Ž -> Zulu, Đ -> Delta
+// (u medunarodnom prometu strana slova se zamjenjuju najbliÅ¾im engleskim ekvivalentom)
+
+// 50 jadranskih pojmova s nautickih karata
+const SPELL_TERMS=[
+ {w:"SPLIT",t:"luka"},
+ {w:"RIJEKA",t:"luka"},
+ {w:"PULA",t:"luka"},
+ {w:"ZADAR",t:"luka"},
+ {w:"DUBROVNIK",t:"luka"},
+ {w:"ŠIBENIK",t:"luka"},
+ {w:"PLOČE",t:"luka"},
+ {w:"OPATIJA",t:"grad"},
+ {w:"ROVINJ",t:"grad"},
+ {w:"POREČ",t:"grad"},
+ {w:"MAKARSKA",t:"grad"},
+ {w:"BRAČ",t:"otok"},
+ {w:"HVAR",t:"otok"},
+ {w:"VIS",t:"otok"},
+ {w:"KORČULA",t:"otok"},
+ {w:"MLJET",t:"otok"},
+ {w:"LASTOVO",t:"otok"},
+ {w:"KRK",t:"otok"},
+ {w:"CRES",t:"otok"},
+ {w:"LOŠINJ",t:"otok"},
+ {w:"PAG",t:"otok"},
+ {w:"RAB",t:"otok"},
+ {w:"UGLJAN",t:"otok"},
+ {w:"PAŠMAN",t:"otok"},
+ {w:"DUGI OTOK",t:"otok"},
+ {w:"BIŠEVO",t:"otok"},
+ {w:"ŠOLTA",t:"otok"},
+ {w:"ČIOVO",t:"otok"},
+ {w:"SAVUDRIJA",t:"rt / svjetionik"},
+ {w:"KAMENJAK",t:"rt"},
+ {w:"PLOČA",t:"rt"},
+ {w:"STONČICA",t:"rt / svjetionik"},
+ {w:"PALAGRUŽA",t:"otok / svjetionik"},
+ {w:"SUSAK",t:"otok"},
+ {w:"JABUKA",t:"otočić"},
+ {w:"VELI RAT",t:"svjetionik"},
+ {w:"PRIŠNJAK",t:"svjetionik"},
+ {w:"SUŠAC",t:"otok / svjetionik"},
+ {w:"GLAVAT",t:"svjetionik"},
+ {w:"BLITVENICA",t:"svjetionik"},
+ {w:"KOMIŽA",t:"uvala"},
+ {w:"VELA LUKA",t:"uvala"},
+ {w:"SLANO",t:"uvala"},
+ {w:"BAŠKA",t:"uvala"},
+ {w:"NJIVICE",t:"uvala"},
+ {w:"BOL",t:"mjesto"},
+ {w:"JELSA",t:"mjesto"},
+ {w:"CAVTAT",t:"mjesto"},
+ {w:"PELJEŠAC",t:"poluotok"},
+ {w:"KORNATI",t:"otočje"}
+];
+
+// Pretvorba pojma u sricano
+function spellWord(word){
+ const out=[];
+ for(const ch of word.toUpperCase()){
+   if(ch===" "){ out.push("(razmak)"); continue; }
+   if(ch==="-"){ out.push("(crtica)"); continue; }
+   if(SPELL_ALPHA[ch]){ out.push(SPELL_ALPHA[ch]); continue; }
+   // dijakritika
+   if(ch==="Č"||ch==="Ć"){ out.push("Charlie"); continue; }
+   if(ch==="Š"){ out.push("Sierra"); continue; }
+   if(ch==="Ž"){ out.push("Zulu"); continue; }
+   if(ch==="Đ"){ out.push("Delta"); continue; }
+   if(SPELL_NUM[ch]){ out.push(SPELL_NUM[ch].full); continue; }
+   out.push(ch);
+ }
+ return out.join(" - ");
+}
+
+function openSpelling(){
+  currentSec="spell";
+  document.getElementById('menuView').classList.add('hidden');
+  document.getElementById('quizView').classList.add('active');
+  document.getElementById('hdrSub').textContent=`Vježba sricanja: pogledaj pojam, srici ga u sebi prema međunarodnoj tablici, pa klikni Odgovor da provjeriš.`;
+  document.getElementById('final').classList.remove('show');
+  // sakrij brojac i traku napretka jer ovdje nema ocjenjivanja
+  document.getElementById('answeredPill').textContent='Vježba';
+  document.getElementById('scorePill').textContent='';
+  document.getElementById('fill').style.width='0%';
+  quizBody.innerHTML='';
+
+  // zaglavlje
+  const head=document.createElement('div');
+  head.className='section-head';
+  head.innerHTML=`<span class="num">6</span><div><h2>Sricanje (vježba)</h2><small>Međunarodna tablica · ${SPELL_TERMS.length} jadranskih pojmova</small></div>`;
+  quizBody.appendChild(head);
+
+  // uvod
+  const intro=document.createElement('div');
+  intro.className='spell-intro';
+  intro.innerHTML=`
+    <h3>Kako vježbati</h3>
+    <p>Ispod je međunarodna tablica sricanja koju koristi pomorska radijska služba. Listaj pojmove, pokušaj svaki srediti u sebi slovo po slovo, pa klikni <strong>Odgovor</strong> da vidiš točno sricanje. Naša slova s dijakritikom (Č, Ć, Š, Ž, Đ) sriču se preko najbližeg latinskog ekvivalenta (Č/Ć → Charlie, Š → Sierra, Ž → Zulu, Đ → Delta).</p>`;
+  quizBody.appendChild(intro);
+
+  // tablica
+  const tbl=document.createElement('div');
+  tbl.className='spell-table';
+  let tblHtml='<div class="spell-section-title">Slova</div>';
+  Object.keys(SPELL_ALPHA).forEach(l=>{
+    tblHtml+=`<div class="spell-cell"><span class="l">${l}</span><span class="w">${SPELL_ALPHA[l]}</span></div>`;
+  });
+  tblHtml+='<div class="spell-section-title">Hrvatska dijakritika (zamjenski izgovor)</div>';
+  [["Č","Charlie"],["Ć","Charlie"],["Š","Sierra"],["Ž","Zulu"],["Đ","Delta"]].forEach(([l,w])=>{
+    tblHtml+=`<div class="spell-cell dia"><span class="l">${l}</span><span class="w">${w}</span></div>`;
+  });
+  tblHtml+='<div class="spell-section-title">Brojevi · pomorski (IMO) oblik</div>';
+  tblHtml+='<div class="num-note">Pomorski (službeni) oblik brojeva je složenica od strane riječi za broj i engleske riječi za broj, izgovara se s naglaskom na <strong>drugom</strong> dijelu (engleskoj riječi). Primjer: <em>Una-One</em> = „u-na-uan". Prvi dio dolazi iz španjolskog, talijanskog ili grčkog (Una=1, Bisso=2, Terra=3, Karte=4 i tako dalje), pa stranci raznih jezika prepoznaju barem jednu polovicu. U praksi se danas najčešće koristi samo engleski oblik desno (One, Two, Three...).</div>';
+  Object.keys(SPELL_NUM).forEach(n=>{
+    const o=SPELL_NUM[n];
+    tblHtml+=`<div class="spell-cell num"><span class="l">${n}</span><span class="w"><span class="num-full">${o.full}</span><span class="num-simple">${o.simple}</span></span></div>`;
+  });
+  tbl.innerHTML=tblHtml;
+  quizBody.appendChild(tbl);
+
+  // naslov pojmova
+  const tHead=document.createElement('div');
+  tHead.className='section-head';
+  tHead.innerHTML=`<span class="num">★</span><div><h2>Vježba: pojmovi s jadranskih karata</h2><small>Klikni Odgovor nakon što sam središ pojam</small></div>`;
+  quizBody.appendChild(tHead);
+
+  // 50 pojmova
+  SPELL_TERMS.forEach((t,i)=>{
+    const card=document.createElement('div');
+    card.className='term-card';
+    const tid=`t_${i}`;
+    card.innerHTML=`
+      <div>
+        <div class="term-word">${t.w}</div>
+        <span class="term-tag">${t.t}</span>
+      </div>
+      <button class="btn btn-term" data-act="term" data-tid="${tid}" data-idx="${i}">Odgovor</button>
+      <div class="term-answer" id="${tid}_a"></div>`;
+    quizBody.appendChild(card);
+  });
+
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// klik na "Odgovor" kod pojma (registriramo na document zbog TDZ)
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button[data-act="term"]');
+  if(!b)return;
+  const i=parseInt(b.dataset.idx,10);
+  const tid=b.dataset.tid;
+  const ans=document.getElementById(tid+'_a');
+  const t=SPELL_TERMS[i];
+  if(ans.classList.contains('show')){
+    ans.classList.remove('show');
+    b.classList.remove('shown');
+    b.textContent='Odgovor';
+  }else{
+    ans.innerHTML=`<strong style="display:block;font-family:'Barlow Condensed',sans-serif;letter-spacing:.08em;text-transform:uppercase;font-size:.78rem;color:#1b6ca8;margin-bottom:4px">Sricanje</strong>${spellWord(t.w)}`;
+    ans.classList.add('show');
+    b.classList.add('shown');
+    b.textContent='Sakrij';
+  }
+});
+
+const menuGrid=document.getElementById('menuGrid');
+function buildMenu(){
+  menuGrid.innerHTML='';
+  SECTIONS.forEach((sec,si)=>{
+    const tot=sec.questions.length;
+    const st=progress[si];
+    const ans=Object.keys(st).length;
+    const corr=Object.values(st).filter(v=>v==='correct').length;
+    const done=ans>=tot;
+    const card=document.createElement('div');
+    card.className='menu-card'+(done?' completed':'');
+    card.onclick=()=>openSection(si);
+    card.innerHTML=`
+      <span class="badge-done">Završeno</span>
+      <div class="mc-num">${sec.num}</div>
+      <h3>${sec.title}</h3>
+      <div class="mc-meta">${tot} pitanja · ${sec.sub}</div>
+      <div class="mc-prog"><div class="mc-fill" style="width:${tot?ans/tot*100:0}%"></div></div>
+      <div class="mc-stat">${ans>0?`Riješeno ${ans}/${tot} · točno ${corr}`:'Nije započeto'}</div>`;
+    menuGrid.appendChild(card);
+  });
+  // Sesta kartica – sricanje
+  const spell=document.createElement('div');
+  spell.className='menu-card spell';
+  spell.onclick=()=>openSpelling();
+  spell.innerHTML=`
+    <div class="mc-num">6</div>
+    <h3>Sricanje (vježba)</h3>
+    <div class="mc-meta">${SPELL_TERMS.length} pojmova · vježba</div>
+    <div class="mc-prog"><div class="mc-fill" style="width:0%"></div></div>
+    <div class="mc-stat">Međunarodna tablica + jadranski pojmovi</div>`;
+  menuGrid.appendChild(spell);
+}
+
+/* ---------- RENDER CJELINE ---------- */
+const quizBody=document.getElementById('quizBody');
+function openSection(si){
+  currentSec=si;
+  const sec=SECTIONS[si];
+  document.getElementById('menuView').classList.add('hidden');
+  document.getElementById('quizView').classList.add('active');
+  document.getElementById('hdrSub').textContent=`Cjelina ${sec.num}: ${sec.title}. Upiši odgovor i klikni Provjeri. Klikni Pomoć za skrivenu natuknicu.`;
+  document.getElementById('final').classList.remove('show');
+  quizBody.innerHTML='';
+  const head=document.createElement('div');
+  head.className='section-head';
+  head.innerHTML=`<span class="num">${sec.num}</span><div><h2>${sec.title}</h2><small>${sec.sub} · ${sec.questions.length} pitanja</small></div>`;
+  quizBody.appendChild(head);
+  sec.questions.forEach((qq,qi)=>{
+    const gid=`s${si}_q${qi}`;
+    const card=document.createElement('div');
+    card.className='q'+(qi===sec.questions.length-1?' last-in-sec':'');
+    card.dataset.gid=gid;card._data=qq;card._si=si;
+    let dia='';
+    if(qq.diagram && SVG[qq.diagram]) dia=`<div class="diagram">${SVG[qq.diagram]}<div class="cap">${qq.cap||''}</div></div>`;
+    const inp=qq.textarea
+      ? `<textarea id="${gid}_in" placeholder="Upiši svoj odgovor..."></textarea>`
+      : `<input type="text" id="${gid}_in" placeholder="Upiši svoj odgovor..." autocomplete="off">`;
+    card.innerHTML=`
+      <div class="q-top">
+        <div class="q-no">${qi+1}</div>
+        <div class="q-text">${qq.q}</div>
+      </div>
+      ${dia}
+      <div class="answer-row">
+        ${inp}
+        <button class="btn btn-check" data-act="check" data-gid="${gid}">Provjeri</button>
+        <button class="btn btn-hint" data-act="hint" data-gid="${gid}">Pomoć</button>
+        <button class="btn btn-show" data-act="show" data-gid="${gid}">Prikaži odgovor</button>
+      </div>
+      <div class="hintbox" id="${gid}_hint">${qq.hint||'Nema dodatne natuknice za ovo pitanje.'}</div>
+      <div class="feedback" id="${gid}_fb"></div>`;
+    quizBody.appendChild(card);
+  });
+  updateBar();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function goMenu(){
+  document.getElementById('quizView').classList.remove('active');
+  document.getElementById('menuView').classList.remove('hidden');
+  buildMenu();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---------- PROVJERA ---------- */
+function normalize(s){
+  return s.toLowerCase()
+    .replace(/[čć]/g,'c').replace(/š/g,'s').replace(/ž/g,'z').replace(/đ/g,'dj')
+    .replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+}
+function matchGroup(nv,variants){
+  return variants.some(v=>{
+    const a=normalize(v);
+    if(!a) return false;
+    if(nv.includes(a)) return true;
+    // kratke numeričke/jednorječne varijante: dopusti i da unos bude unutar varijante
+    if(a.length<=3) return new RegExp('(^| )'+a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'( |$)').test(nv);
+    return false;
+  });
+}
+function checkAnswer(gid){
+  const card=document.querySelector(`.q[data-gid="${gid}"]`);
+  const qq=card._data, si=card._si;
+  const val=document.getElementById(gid+'_in').value;
+  const fb=document.getElementById(gid+'_fb');
+  if(!val.trim()){
+    fb.className='feedback wrong';
+    fb.innerHTML='<strong>Prazno</strong>Upiši odgovor pa klikni Provjeri.';
+    return;
+  }
+  const nv=normalize(val);
+  let ok;
+  if(qq.all){
+    ok=qq.req.every(group=>matchGroup(nv,group));
+  }else{
+    ok=matchGroup(nv,qq.a);
+  }
+  if(ok){
+    progress[si][gid]='correct';
+    fb.className='feedback correct';
+    fb.innerHTML=`<strong>Točno ✓</strong>`;
+  }else{
+    if(progress[si][gid]!=='shown') progress[si][gid]='wrong';
+    fb.className='feedback wrong';
+    fb.innerHTML=qq.all
+      ? `<strong>Netočno ✗</strong>Odgovor mora sadržavati SVE tražene dijelove (${qq.req.length}). Pokušaj ponovno ili klikni Prikaži odgovor.`
+      : `<strong>Netočno ✗</strong>Pokušaj ponovno ili klikni Prikaži odgovor.`;
+  }
+  updateBar();
+}
+function toggleHint(gid){
+  document.getElementById(gid+'_hint').classList.toggle('show');
+}
+function showAnswer(gid){
+  const card=document.querySelector(`.q[data-gid="${gid}"]`);
+  const qq=card._data, si=card._si;
+  const qi=parseInt(gid.split('_q')[1],10);
+  const fb=document.getElementById(gid+'_fb');
+  if(progress[si][gid]!=='correct') progress[si][gid]='shown';
+  let sol;
+  if(typeof SOLS!=='undefined' && SOLS[si] && SOLS[si][qi]!==undefined){
+    sol=SOLS[si][qi];
+  }else if(qq.all){
+    sol='Odgovor mora pokriti: '+qq.req.map(g=>g[0]).join(' + ');
+  }else{
+    sol=qq.a[0];
+  }
+  fb.className='feedback shown';
+  fb.innerHTML=`<strong>Točan odgovor</strong><span class="sol">${sol}</span>`;
+  updateBar();
+}
+quizBody.addEventListener('click',e=>{
+  const b=e.target.closest('button[data-act]');
+  if(!b)return;
+  if(b.dataset.act==='check') checkAnswer(b.dataset.gid);
+  else if(b.dataset.act==='hint') toggleHint(b.dataset.gid);
+  else showAnswer(b.dataset.gid);
+});
+quizBody.addEventListener('keydown',e=>{
+  if(e.key==='Enter' && e.target.tagName==='INPUT'){
+    e.preventDefault();
+    const c=e.target.closest('.q');
+    if(c) checkAnswer(c.dataset.gid);
+  }
+});
+
+/* ---------- TRAKA + REZULTAT ---------- */
+function updateBar(){
+  if(currentSec===null||currentSec==='spell')return;
+  const sec=SECTIONS[currentSec], tot=sec.questions.length;
+  const st=progress[currentSec];
+  const ans=Object.keys(st).length;
+  const corr=Object.values(st).filter(v=>v==='correct').length;
+  document.getElementById('answeredPill').textContent=`${ans} / ${tot}`;
+  document.getElementById('scorePill').textContent=`Točno: ${corr}`;
+  document.getElementById('fill').style.width=(tot?ans/tot*100:0)+'%';
+  if(ans>=tot) showFinal();
+}
+function showFinal(){
+  const sec=SECTIONS[currentSec], tot=sec.questions.length;
+  const corr=Object.values(progress[currentSec]).filter(v=>v==='correct').length;
+  const pct=Math.round(corr/tot*100);
+  document.getElementById('finalScore').textContent=pct+'%';
+  let m;
+  if(pct>=90) m=`Izvrsno! ${corr} od ${tot} točno u ovoj cjelini.`;
+  else if(pct>=75) m=`Dobro! ${corr} od ${tot} točno. Ponovi pitanja gdje si griješio.`;
+  else if(pct>=50) m=`${corr} od ${tot} točno. Treba još učenja u ovoj cjelini.`;
+  else m=`${corr} od ${tot} točno. Preporuka: ponovo pročitaj ovu cjelinu pa kreni iznova.`;
+  document.getElementById('finalMsg').textContent=m;
+  document.getElementById('final').classList.add('show');
+}
+function resetSection(){
+  if(currentSec===null)return;
+  if(currentSec==='spell'){ openSpelling(); return; }
+  progress[currentSec]={};
+  openSection(currentSec);
+}
+
+buildMenu();
+</script>
+</body>
+</html>
