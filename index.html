@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#06192e">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Kviz – Voditelj brodice kategorije B</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,400;0,600;0,800;1,400&family=Barlow+Condensed:wght@500;600;700&display=swap');
@@ -123,6 +124,31 @@
   /* ===== SRICANJE (vjezba) ===== */
   .menu-card.spell{border-left-color:var(--gold)}
   .menu-card.spell .mc-num{color:var(--coral)}
+  .menu-card.knots{border-left-color:var(--green)}
+  .menu-card.knots .mc-num{color:var(--sea)}
+  /* Cvorovi (vjezba) */
+  .knot-card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:0;margin-bottom:18px;overflow:hidden}
+  .knot-card:nth-of-type(even){background:#fdfaf2}
+  .knot-head{padding:18px 22px;display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap}
+  .knot-name{font-family:'Barlow Condensed',sans-serif;font-size:1.55rem;font-weight:700;color:var(--navy);letter-spacing:.03em;flex:1;min-width:160px;line-height:1.1}
+  .knot-desc{flex:1 1 100%;color:#4a5a64;font-size:.98rem;margin-top:4px;line-height:1.55}
+  .knot-video-wrap{position:relative;width:100%;background:#000;border-top:1px solid var(--line);aspect-ratio:16 / 9}
+  .knot-video-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .knot-thumb{position:absolute;inset:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;cursor:pointer;background-size:cover;background-position:center;background-color:#0a2540}
+  .knot-thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.1) 0%,rgba(0,0,0,.55) 100%)}
+  .knot-play{position:relative;z-index:2;width:74px;height:74px;border-radius:50%;background:var(--coral);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 22px rgba(0,0,0,.45);transition:transform .15s,background .2s}
+  .knot-thumb:hover .knot-play{transform:scale(1.08);background:var(--gold)}
+  .knot-play svg{width:30px;height:30px;fill:#fff;margin-left:5px}
+  .knot-thumb-label{position:absolute;bottom:14px;left:18px;right:18px;z-index:2;color:#fff;font-family:'Barlow Condensed',sans-serif;letter-spacing:.12em;text-transform:uppercase;font-size:.78rem;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+  .knots-intro{background:linear-gradient(160deg,#1f4d3a,var(--navy));color:var(--sand);border-radius:12px;padding:22px 24px;margin:24px 0 22px;border-left:6px solid var(--green)}
+  .knots-intro h3{font-size:1.15rem;margin-bottom:8px;color:#a8e0c4;font-family:'Barlow Condensed',sans-serif;letter-spacing:.08em;text-transform:uppercase}
+  .knots-intro p{font-size:.94rem;color:#cfe4ef;line-height:1.55}
+  @media(max-width:560px){
+    .knot-name{font-size:1.3rem}
+    .knot-head{padding:16px 14px}
+    .knot-play{width:60px;height:60px}
+    .knot-play svg{width:24px;height:24px}
+  }
   .spell-intro{background:linear-gradient(160deg,var(--navy),var(--deep));color:var(--sand);border-radius:12px;padding:22px 24px;margin:24px 0 20px;border-left:6px solid var(--gold)}
   .spell-intro h3{font-size:1.15rem;margin-bottom:8px;color:var(--gold);font-family:'Barlow Condensed',sans-serif;letter-spacing:.08em;text-transform:uppercase}
   .spell-intro p{font-size:.94rem;color:#cfe4ef;line-height:1.55}
@@ -1204,6 +1230,113 @@ document.addEventListener('click',e=>{
   }
 });
 
+/* ---------- CVOROVI (vjezba) ---------- */
+const KNOTS=[
+ {
+  name:"Muški čvor",
+  desc:"Najjednostavniji spojni čvor; koristi se za spajanje dvaju konopa jednake debljine, na primjer za vezivanje zavoja ili spajanje kraćih dijelova. Pod opterećenjem se može pretvoriti u klizni čvor pa za zahtjevnije svrhe valja koristiti pouzdaniji spoj.",
+  yt:"xLgnYtGYeGU"
+ },
+ {
+  name:"Zastavni čvor",
+  desc:"Brzo i pouzdano spaja dva konopa, posebno različitih debljina; nezamjenjiv je za podizanje zastave na brod jer se lako veže i otpušta i kad je opterećen.",
+  yt:"5-lfaUY7-Ps"
+ },
+ {
+  name:"Vrzni čvor",
+  desc:"Veže se za nepomični predmet (oblicu, prečku, kolac); ne klizi po oblici i konopu, koristi se za privezivanje vrza na pripone i bacala na privezne konope.",
+  yt:"U0RrA4cxCvo"
+ },
+ {
+  name:"Osmica",
+  desc:"Stoper-čvor koji se veže na kraju konopa kako se konop ne bi izvukao kroz koloturnik ili otvor; lako se prepoznaje po obliku brojke 8 i lakše se odvezuje od običnog uzla nakon opterećenja.",
+  yt:"xwYw4G9ekaE"
+ },
+ {
+  name:"Pašnjak",
+  desc:"Daje fiksnu (nepomičnu) omču na kraju konopa koja se ne steže pod opterećenjem; koristi se za privez, podizanje ljudi i tereta te kao siguran čvor za opasnost u moru.",
+  yt:"3gMGrA1nHjk"
+ },
+ {
+  name:"Sidreni čvor",
+  desc:"Veže konop za sidrenu alku tako da čvrsto drži pod opterećenjem, a istovremeno se relativno lako otpušta kad sidro više nije pod opterećenjem.",
+  yt:"5dCNvQ_6ZMs"
+ },
+ {
+  name:"Plutačni čvor",
+  desc:"Služi za privez broda za plutaču ili obalu; veoma drži pod opterećenjem, ali se teško otpušta nakon što se jednom zategne, pa se rabi tamo gdje je važnija sigurnost priveza od brzog otpuštanja.",
+  yt:"6aIQon2J9vI"
+ },
+ {
+  name:"Trubni čvor",
+  desc:"Brzo i privremeno se veže oko oblice, prečke ili bitve (clove hitch); jednostavan za vezivanje i otpuštanje, pogodan za privremeni privez čamca i pričvršćivanje odbojnika.",
+  yt:"nWNP5sZulg8"
+ }
+];
+
+function openKnots(){
+  currentSec="knots";
+  document.getElementById('menuView').classList.add('hidden');
+  document.getElementById('quizView').classList.add('active');
+  document.getElementById('hdrSub').textContent=`Vježba čvorova: pročitaj opis, klikni na sliku da pokreneš video i nauči kako se svaki čvor veže.`;
+  document.getElementById('final').classList.remove('show');
+  document.getElementById('answeredPill').textContent='Vježba';
+  document.getElementById('scorePill').textContent='';
+  document.getElementById('fill').style.width='0%';
+  quizBody.innerHTML='';
+
+  const head=document.createElement('div');
+  head.className='section-head';
+  head.innerHTML=`<span class="num">7</span><div><h2>Čvorovi</h2><small>Vježba · ${KNOTS.length} čvorova s video uputama</small></div>`;
+  quizBody.appendChild(head);
+
+  const intro=document.createElement('div');
+  intro.className='knots-intro';
+  intro.innerHTML=`
+    <h3>Kako vježbati</h3>
+    <p>Za svaki čvor je naveden naziv, kratko objašnjenje kada se koristi i video iz koje se vidi kako se točno veže. Klikni na sliku videa da ga pokreneš ovdje, bez izlaska iz aplikacije. Vježbaj s konopom u ruci uz video, pauziraj kad ti treba i ponavljaj. Na ispitu se traži uredna i sigurna izvedba, najbolje napamet.</p>`;
+  quizBody.appendChild(intro);
+
+  KNOTS.forEach((k,i)=>{
+    const card=document.createElement('div');
+    card.className='knot-card';
+    card.innerHTML=`
+      <div class="knot-head">
+        <div class="knot-name">${i+1}. ${k.name}</div>
+        <div class="knot-desc">${k.desc}</div>
+      </div>
+      <div class="knot-video-wrap" id="kv_${i}">
+        <div class="knot-thumb" data-act="playknot" data-idx="${i}"
+             style="background-image:url('https://i.ytimg.com/vi/${k.yt}/hqdefault.jpg')">
+          <div class="knot-play" aria-label="Pokreni video">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+          <div class="knot-thumb-label">Klikni za pokretanje videa</div>
+        </div>
+      </div>`;
+    quizBody.appendChild(card);
+  });
+
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// Klik na thumbnail cvora -> ubaci YouTube iframe (lazy embed, ne uziva mrežu dok ne klikneš)
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act="playknot"]');
+  if(!b)return;
+  const i=parseInt(b.dataset.idx,10);
+  const wrap=document.getElementById('kv_'+i);
+  if(!wrap)return;
+  const ytId=KNOTS[i].yt;
+  // Privacy-enhanced YouTube embed (no cookies dok user ne klikne play unutar iframea)
+  wrap.innerHTML=`<iframe
+    src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1&playsinline=1"
+    title="${KNOTS[i].name}"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    allowfullscreen
+    referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
+});
+
 const menuGrid=document.getElementById('menuGrid');
 function buildMenu(){
   menuGrid.innerHTML='';
@@ -1236,6 +1369,17 @@ function buildMenu(){
     <div class="mc-prog"><div class="mc-fill" style="width:0%"></div></div>
     <div class="mc-stat">Međunarodna tablica + jadranski pojmovi</div>`;
   menuGrid.appendChild(spell);
+  // Sedma kartica – cvorovi
+  const knots=document.createElement('div');
+  knots.className='menu-card knots';
+  knots.onclick=()=>openKnots();
+  knots.innerHTML=`
+    <div class="mc-num">7</div>
+    <h3>Čvorovi</h3>
+    <div class="mc-meta">${KNOTS.length} čvorova · vježba</div>
+    <div class="mc-prog"><div class="mc-fill" style="width:0%"></div></div>
+    <div class="mc-stat">Video upute s opisom upotrebe</div>`;
+  menuGrid.appendChild(knots);
 }
 
 /* ---------- RENDER CJELINE ---------- */
@@ -1372,7 +1516,7 @@ quizBody.addEventListener('keydown',e=>{
 
 /* ---------- TRAKA + REZULTAT ---------- */
 function updateBar(){
-  if(currentSec===null||currentSec==='spell')return;
+  if(currentSec===null||currentSec==='spell'||currentSec==='knots')return;
   const sec=SECTIONS[currentSec], tot=sec.questions.length;
   const st=progress[currentSec];
   const ans=Object.keys(st).length;
@@ -1398,6 +1542,7 @@ function showFinal(){
 function resetSection(){
   if(currentSec===null)return;
   if(currentSec==='spell'){ openSpelling(); return; }
+  if(currentSec==='knots'){ openKnots(); return; }
   progress[currentSec]={};
   openSection(currentSec);
 }
